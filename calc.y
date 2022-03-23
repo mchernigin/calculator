@@ -3,6 +3,7 @@
 
 extern int yylex();
 extern int yyparse();
+extern int yy_scan_string();
 
 void yyerror(const char * msg);
 %}
@@ -16,6 +17,7 @@ void yyerror(const char * msg);
 
 calclist:
  | calclist exp EOL { printf ("= %d\n", $2); }
+ | calclist exp     { printf ("%d\n", $2); }
  ;
 
 exp:
@@ -32,6 +34,8 @@ exp:
 
 int main(int argc, char * argv[])
 {
+    if (argv[1])
+        yy_scan_string(argv[1]);
     yyparse();
 }
 
