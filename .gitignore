@@ -1,3 +1,8 @@
 .DS_store
-.vscode
-wc
+.vscode/
+journal/
+
+*.tab.*
+*.yy.*
+calc
+calc.output
