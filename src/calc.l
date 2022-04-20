@@ -1,4 +1,5 @@
 %{
+#define YYSTYPE long double
 #include "calc.tab.h"
 %}
 
@@ -8,10 +9,10 @@
 
 %%
 
-[ \t]   ;
-[0-9]+  { yylval = atoi(yytext); return NUM; }
-[+\-*/] { return yytext[0]; }
-[()]    { return yytext[0]; }
-.       { printf("Unknown character: \"%s\"", yytext); }
+[ \t]                   ;
+[+-]?([0-9]*[.])?[0-9]+ { yylval = strtold(yytext, NULL); return NUM; }
+[+\-*/]                 { return yytext[0]; }
+[()]                    { return yytext[0]; }
+.                       { printf("Unknown character: \"%s\"", yytext); }
 
 %%

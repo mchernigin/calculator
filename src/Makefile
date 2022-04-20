@@ -15,4 +15,4 @@ main.c : calc.lex.h calc.tab.h
 
 .PHONY : clean
 clean :
-	rm -rf *.tab.[ch] *.lex.[ch] main.o main
+	rm -rf *.tab.[cho] *.lex.[cho] main.o main

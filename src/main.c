@@ -1,11 +1,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <assert.h>
 
 #include "common.h"
 #include "parser.h"
 
-bool
+void
 parse_args(config_t *config, int argc, char *argv[])
 {
     for (;;) {
@@ -27,18 +28,22 @@ parse_args(config_t *config, int argc, char *argv[])
             char *end;
             config->iteration_number = strtoul(optarg, &end, 10);
             if (*end != '\0') {
-                fprintf(stderr, "n must be an integer number\n");
-                return (false);
+                fprintf(stderr, "ERROR: n is not an integer\n");
+                exit(EXIT_FAILURE);
             }
             break;
         }
         case '?':
-            return (false);
+        default:
+            exit(EXIT_FAILURE);
         }
     }
 
     config->expr = argv[optind];
-    return (true);
+    if (!config->expr) {
+        fprintf(stderr, "ERROR: no expresion was provided\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 int
@@ -46,15 +51,25 @@ main(int argc, char *argv[])
 {
     config_t config = {
         .iteration_number = 1,
-        .expr = NULL,
+        .mode = MODE_PARSER,
     };
+    parse_args(&config, argc, argv);
 
-    if (!parse_args(&config, argc, argv)) {
-        return (EXIT_FAILURE);
+    switch (config.mode)
+    {
+    case MODE_PARSER:
+    {
+        for (size_t i = 0; i < config.iteration_number; ++i) {
+            yy_scan_string(config.expr);
+            yyparse();
+        }
+        break;
     }
-
-    yy_scan_string(config.expr);
-    yyparse();
+    case MODE_AST:
+        assert(false && "Not implemented yet");
+    default:
+        break;
+    }
 
     return (EXIT_SUCCESS);
 }

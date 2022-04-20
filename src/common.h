@@ -9,9 +9,9 @@ typedef enum {
 } calc_mode_t;
 
 typedef struct config_t {
+    char *expr;
     calc_mode_t mode;
     size_t iteration_number;
-    char *expr;
 } config_t;
 
 #endif // COMMON_H

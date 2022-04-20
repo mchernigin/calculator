@@ -2,7 +2,7 @@
 .vscode/
 journal/
 
-*.tab.[ch]
-*.lex.[ch]
+*.tab.[cho]
+*.lex.[cho]
 main.o
 main
