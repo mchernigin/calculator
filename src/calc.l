@@ -1,13 +1,15 @@
 %{
 #include "calc.tab.h"
-#define YY_DECL int yylex()
 %}
+
+%option nounput
+%option noinput
+%option noyywrap
 
 %%
 
 [ \t]   ;
-[\n]    { return EOL; }
-[0-9]+  { yylval = atoi(yytext); return INT; }
+[0-9]+  { yylval = atoi(yytext); return NUM; }
 [+\-*/] { return yytext[0]; }
 [()]    { return yytext[0]; }
 .       { printf("Unknown character: \"%s\"", yytext); }
