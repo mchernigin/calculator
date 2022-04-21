@@ -4,5 +4,6 @@ journal/
 
 *.tab.[cho]
 *.lex.[cho]
+ast.o
 main.o
 main

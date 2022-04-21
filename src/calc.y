@@ -1,40 +1,45 @@
 %{
 #include <stdio.h>
-#include <getopt.h>
-#include <stdbool.h>
 
-#define YYSTYPE long double
+#include "ast.h"
+#include "calc.lex.h"
 #include "common.h"
 
 extern int yylex();
 extern int yyparse();
-extern int yy_scan_string();
+extern YY_BUFFER_STATE yy_scan_string();
 
 void
 yyerror(const char *msg)
 {
-    fprintf(stderr, "ERROR: %s\n", msg);
+  fprintf(stderr, "ERROR: %s\n", msg);
 }
 
 %}
 
-%token NUM
+%union {
+  ast_t *ast;
+  long double d;
+}
+
+%token <d> NUM
 %left '+' '-'
 %left '*' '/'
 %precedence NEG
+%type <ast> exp
 
 %%
 
-calclist: exp { printf("%Lg\n", $1); }
+calclist: exp { EVAL($1); }
 
 exp:
-   NUM
- | exp '+' exp       { $$ = $1 + $3; }
- | exp '-' exp       { $$ = $1 - $3; }
- | exp '*' exp       { $$ = $1 * $3; }
- | exp '/' exp       { $$ = $1 / $3; }
- | '-' exp %prec NEG { $$ = -$2;     }
- | '(' exp ')'       { $$ = $2;      }
+   NUM               { NUM($$, $1);     }
+ | exp '+' exp       { ADD($$, $1, $3); }
+ | exp '-' exp       { SUB($$, $1, $3); }
+ | exp '*' exp       { MUL($$, $1, $3); }
+ | exp '/' exp       { DIV($$, $1, $3); }
+ | '-' exp %prec NEG { NEG($$, $2);     }
+ | '(' exp ')'       { $$ = $2;         }
  ;
 
 %%

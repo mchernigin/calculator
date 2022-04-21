@@ -5,7 +5,7 @@
 
 typedef enum {
     MODE_PARSER,
-    MODE_AST,
+    MODE_AST
 } calc_mode_t;
 
 typedef struct config_t {

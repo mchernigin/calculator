@@ -1,18 +1,19 @@
 %{
 #define YYSTYPE long double
+#include "ast.h"
 #include "calc.tab.h"
 %}
 
-%option nounput
-%option noinput
-%option noyywrap
+%option nounput noinput noyywrap
+
+EXP ([Ee][-+]?[0-9]+)
 
 %%
 
-[ \t]                   ;
-[+-]?([0-9]*[.])?[0-9]+ { yylval = strtold(yytext, NULL); return NUM; }
-[+\-*/]                 { return yytext[0]; }
-[()]                    { return yytext[0]; }
-.                       { printf("Unknown character: \"%s\"", yytext); }
+[ \t]                 ;
+[+\-*/()]             { return yytext[0]; }
+[0-9]+"."[0-9]*{EXP}? |
+"."?[0-9]+{EXP}?      { yylval = strtold(yytext, NULL); return NUM; }
+.                     { printf("Unknown character: \"%s\"", yytext); }
 
 %%

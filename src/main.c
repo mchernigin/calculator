@@ -3,6 +3,7 @@
 #include <getopt.h>
 #include <assert.h>
 
+#include "ast.h"
 #include "common.h"
 #include "parser.h"
 
@@ -46,6 +47,26 @@ parse_args(config_t *config, int argc, char *argv[])
     }
 }
 
+void
+run_parser(config_t *config)
+{
+    puts("PARSER");
+    for (size_t i = 0; i < config->iteration_number; ++i) {
+        yy_scan_string(config->expr);
+        yyparse();
+    }
+}
+
+void
+run_ast(config_t *config)
+{
+    puts("AST");
+    for (size_t i = 0; i < config->iteration_number; ++i) {
+        yy_scan_string(config->expr);
+        yyparse();
+    }
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -57,18 +78,15 @@ main(int argc, char *argv[])
 
     switch (config.mode)
     {
-    case MODE_PARSER:
-    {
-        for (size_t i = 0; i < config.iteration_number; ++i) {
-            yy_scan_string(config.expr);
-            yyparse();
-        }
+    case MODE_PARSER: 
+        run_parser(&config);
         break;
-    }
     case MODE_AST:
-        assert(false && "Not implemented yet");
-    default:
+        run_ast(&config);
         break;
+    default:
+        fprintf(stderr, "ERROR: Unexpected mode\n");
+        return (EXIT_FAILURE);
     }
 
     return (EXIT_SUCCESS);

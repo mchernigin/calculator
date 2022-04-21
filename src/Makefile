@@ -9,10 +9,10 @@ YACC = bison
 %.lex.h %.lex.c : %.l
 	$(LEX) --header-file=$*.lex.h -o $*.lex.c $<
 
-main : main.o calc.tab.o calc.lex.o
+main : main.o calc.lex.o ast.o calc.tab.o
 
 main.c : calc.lex.h calc.tab.h
 
 .PHONY : clean
 clean :
-	rm -rf *.tab.[cho] *.lex.[cho] main.o main
+	rm -rf *.tab.[cho] *.lex.[cho] ast.o main.o main
