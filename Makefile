@@ -1,5 +1,5 @@
 CC = cc
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -g
 LEX = flex
 YACC = bison
 
