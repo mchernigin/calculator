@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import argparse
+import random
 from typing import Tuple, Union
-from random import random, choice, randint
 
 
 def positive_int(value: str) -> int:
@@ -20,11 +20,11 @@ def gen_num(config: argparse.Namespace) -> Union[int, float]:
     Generate random number using information in config
     """
     if config.float:
-        x = round(random() * config.boundary, config.precision)
+        x = round(random.random() * config.boundary, config.precision)
     else:
-        x = randint(1, config.boundary)
+        x = random.randint(1, config.boundary)
     
-    if random() < 0.5:
+    if random.random() < 0.5:
         x *= -1
 
     return x
@@ -40,11 +40,11 @@ def gen_exp(config: argparse.Namespace) -> Tuple[str, float]:
         for _ in range(config.numberop):
             exp += str(gen_num(config))
 
-            while parant_count > 0 and random() < 0.15:
+            while parant_count > 0 and random.random() < 0.15:
                 exp += ')'
                 parant_count -= 1
-            exp += choice(['+', '-', '*', '/'])
-            while random() < 0.1:
+            exp += random.choice(['+', '-', '*', '/'])
+            while random.random() < 0.1:
                 exp += '('
                 parant_count += 1
 
@@ -59,12 +59,15 @@ def gen_exp(config: argparse.Namespace) -> Tuple[str, float]:
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--seed', help='Random seed', type=int, default=0)
     parser.add_argument('-n', '--numberop', help='Number of operations', type=positive_int, default=100)
     parser.add_argument('-b', '--boundary', help='Random numbers boundary (-b, b)', type=positive_int, default=10)
     parser.add_argument('-f', '--float', help='Use floats', type=bool, nargs='?', const=True, default=False)
     parser.add_argument('-p', '--precision', help='Float precision', type=positive_int, default=3)
     parser.add_argument('-a', '--answer', help='Also print answer', type=bool, nargs='?', const=True, default=False)
     config = parser.parse_args()
+
+    random.seed(config.seed)
 
     exp, res = gen_exp(config)
     print(exp, end=' ')
