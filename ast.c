@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "ast.tab.h"
 
 ast_t *
 ast_create (int nodetype, ast_t *left, ast_t *right)
@@ -67,5 +68,17 @@ ast_free (ast_t *ast)
         break;
     default:
         fprintf (stderr, "ERROR: Unknown ast nodetype\n");
+    }
+}
+
+void
+run_ast (config_t *config)
+{
+    puts("AST");
+    yyscan_t scanner = NULL;
+
+    for (size_t i = 0; i < config->iteration_number; ++i) {
+        yy_scan_string (config->expr, scanner);
+        astparse (scanner);
     }
 }

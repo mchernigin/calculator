@@ -1,9 +1,10 @@
-%{
-#define YYSTYPE long double
-#include "calc.tab.h"
-%}
+%option nounput noyywrap
+%option reentrant never-interactive bison-bridge
+%option prefix="ast"
 
-%option nounput noinput noyywrap
+%{
+  #include "ast.h"
+%}
 
 EXP ([Ee][-+]?[0-9]+)
 
@@ -12,7 +13,7 @@ EXP ([Ee][-+]?[0-9]+)
 [ \t]                 ;
 [+\-*/()]             { return yytext[0]; }
 [0-9]+"."[0-9]*{EXP}? |
-"."?[0-9]+{EXP}?      { yylval = strtold (yytext, NULL); return NUM; }
+"."?[0-9]+{EXP}?      { yylval->d = strtold (yytext, NULL); return ASTNUM; }
 .                     { printf ("Unknown character: \"%s\"", yytext); }
 
 %%

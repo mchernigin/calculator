@@ -3,16 +3,16 @@ CFLAGS = -Wall -Wextra -g
 LEX = flex
 YACC = bison
 
-%.tab.h %.tab.c : %.y
-	$(YACC) -d $<
-
-%.lex.h %.lex.c : %.l
+%.lex.h %.lex.c: %.l
 	$(LEX) --header-file=$*.lex.h -o $*.lex.c $<
 
-main : main.o calc.lex.o ast.o calc.tab.o
+%.tab.h %.tab.c: %.y
+	$(YACC) -d $<
 
-main.c : calc.lex.h calc.tab.h
+main: main.o parser.lex.o ast.lex.o parser.tab.o ast.tab.o parser.o ast.o
 
-.PHONY : clean
-clean :
+main.c: parser.lex.h parser.tab.h ast.lex.h ast.tab.h
+
+.PHONY: clean
+clean:
 	rm -rf *.tab.[cho] *.lex.[cho] ast.o main.o main

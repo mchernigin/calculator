@@ -4,20 +4,9 @@
 #include <assert.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "ast.h"
-#include "calc.tab.h"
-#include "calc.lex.h"
-
-typedef enum {
-    MODE_PARSER,
-    MODE_AST,
-} calc_mode_t;
-
-typedef struct config_t {
-    char *expr;
-    calc_mode_t mode;
-    size_t iteration_number;
-} config_t;
+#include "parser.h"
 
 bool
 parse_args (config_t *config, int argc, char *argv[])
@@ -56,26 +45,6 @@ parse_args (config_t *config, int argc, char *argv[])
     }
 
     return (true);
-}
-
-void
-run_parser (config_t *config)
-{
-    puts("PARSER");
-    for (size_t i = 0; i < config->iteration_number; ++i) {
-        yy_scan_string (config->expr);
-        yyparse ();
-    }
-}
-
-void
-run_ast (config_t *config)
-{
-    puts("AST");
-    for (size_t i = 0; i < config->iteration_number; ++i) {
-        yy_scan_string (config->expr);
-        yyparse ();
-    }
 }
 
 int

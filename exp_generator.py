@@ -12,7 +12,7 @@ def positive_int(value: str) -> int:
     """
     value = int(value)
     if value <= 0:
-        raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
+        raise argparse.ArgumentTypeError(f"{value} is not a positive integer")
     return value
 
 def gen_num(config: argparse.Namespace) -> Union[int, float]:

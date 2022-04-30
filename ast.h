@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "config.h"
 
 typedef struct ast_t {
     int nodetype;
@@ -15,17 +16,13 @@ typedef struct numval_t {
     long double number;
 } numval_t;
 
+#define YYSTYPE ASTSTYPE
+#include "ast.tab.h"
+
 ast_t *ast_create (int nodetype, ast_t *left, ast_t *right);
 ast_t *numval_create (long double value);
 long double ast_eval (ast_t *ast);
 void ast_free (ast_t *ast);
-
-#define NUM(lvalue, a)    lvalue = numval_create (a);
-#define NEG(lvalue, a)    lvalue = ast_create ('N', a, NULL);
-#define ADD(lvalue, a, b) lvalue = ast_create ('+', a, b);
-#define SUB(lvalue, a, b) lvalue = ast_create ('-', a, b);
-#define MUL(lvalue, a, b) lvalue = ast_create ('*', a, b);
-#define DIV(lvalue, a, b) lvalue = ast_create ('/', a, b);
-#define EVAL(ast)         { printf ("%Lg\n", ast_eval (ast)); ast_free (ast); }
+void run_ast (config_t *config);
 
 #endif // AST_H
