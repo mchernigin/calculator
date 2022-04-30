@@ -1,4 +1,4 @@
-%option nounput noyywrap
+%option noinput nounput noyywrap
 %option reentrant never-interactive bison-bridge
 %option prefix="ast"
 

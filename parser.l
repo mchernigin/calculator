@@ -2,8 +2,7 @@
 %option reentrant never-interactive bison-bridge
 
 %{
-  #define PARSERSTYPE long double
-  #define YYSTYPE PARSERSTYPE
+  #include "parser_type.h"
   #include "parser.tab.h"
 %}
 

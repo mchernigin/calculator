@@ -1,8 +1,6 @@
 %{
-  #define PARSERSTYPE long double
-  #define YYSTYPE PARSERSTYPE
-
   #include <stdio.h>
+  #include "parser_type.h"
   #include "parser.lex.h"
 
   void
