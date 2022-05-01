@@ -9,8 +9,6 @@
   {
     fprintf (stderr, "ERROR: %s\n", msg);
   }
-
-  extern int yylex();
 %}
 
 %param {void *scanner}
