@@ -1,5 +1,6 @@
 %option nounput noinput noyywrap
 %option reentrant never-interactive bison-bridge
+%option prefix="parser"
 
 %{
   #include "parser_type.h"

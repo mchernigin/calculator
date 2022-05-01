@@ -18,4 +18,4 @@ main.c: parser.lex.h parser.tab.h ast.lex.h ast.tab.h
 
 .PHONY: clean
 clean:
-	rm -rf *.tab.[cho] *.lex.[cho] ast.o main.o main
+	rm -rf *.tab.[cho] *.lex.[cho] ast.o parser.o main.o main
