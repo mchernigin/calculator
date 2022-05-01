@@ -58,17 +58,24 @@ main (int argc, char *argv[])
         return (EXIT_FAILURE);
     }
 
+    bool succeeded = false;
     switch (config.mode) {
     case MODE_PARSER:
-        run_parser (&config);
+        succeeded = run_parser (&config);
         break;
     case MODE_AST:
-        run_ast (&config);
+        succeeded = run_ast (&config);
         break;
     default:
         fprintf (stderr, "ERROR: Unexpected calculator mode\n");
         return (EXIT_FAILURE);
     }
+
+    if (!succeeded) {
+        return (EXIT_FAILURE);
+    }
+
+    printf ("%Lg\n", config.result);
 
     return (EXIT_SUCCESS);
 }

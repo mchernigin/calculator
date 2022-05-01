@@ -24,7 +24,7 @@
 
 %%
 
-calclist: exp {  }
+calclist: exp { PARSERSTYPE *res = parserget_extra (scanner); *res = $1; }
 
 exp:
   NUM               { $$ = $1;      }

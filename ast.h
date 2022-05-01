@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "config.h"
 
 typedef struct ast_t {
@@ -23,6 +24,6 @@ ast_t *ast_create (int nodetype, ast_t *left, ast_t *right);
 ast_t *numval_create (long double value);
 long double ast_eval (ast_t *ast);
 void ast_free (ast_t *ast);
-void run_ast (config_t *config);
+bool run_ast (config_t *config);
 
 #endif // AST_H

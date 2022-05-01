@@ -10,6 +10,7 @@ typedef enum {
 
 typedef struct config_t {
     char *expr;
+    long double result;
     calc_mode_t mode;
     size_t iteration_number;
 } config_t;

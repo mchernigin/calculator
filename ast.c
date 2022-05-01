@@ -74,14 +74,27 @@ ast_free (ast_t *ast)
     }
 }
 
-void
+bool
 run_ast (config_t *config)
 {
     yyscan_t scanner = NULL;
-    astlex_init (&scanner);
+
+    if (astlex_init_extra (&config->result, &scanner)) {
+        fprintf (stderr, "ERROR: cannot initialize scanner\n");
+        return (false);
+    }
 
     for (size_t i = 0; i < config->iteration_number; ++i) {
-        ast_scan_string (config->expr, scanner);
-        astparse (scanner);
+        if (ast_scan_string (config->expr, scanner) == NULL) {
+            fprintf (stderr, "ERROR: cannot set string to parse\n");
+            return (false);
+        }
+
+        if (astparse (scanner)) {
+            fprintf (stderr, "ERROR: cannot parse string\n");
+            return (false);
+        }
     }
+
+    return (true);
 }

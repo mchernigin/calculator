@@ -29,7 +29,7 @@
 
 %%
 
-calclist: exp { ast_eval ($1); ast_free ($1); }
+calclist: exp { long double *res = astget_extra (scanner); *res = ast_eval ($1); ast_free ($1); }
 
 exp:
   NUM               { $$ = numval_create ($1);       }
