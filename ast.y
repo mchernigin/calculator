@@ -1,5 +1,4 @@
 %code top {
-  #include <stdio.h>
   #include "ast.h"
   #include "ast.lex.h"
 
@@ -17,7 +16,7 @@
 
 %union {
   ast_t *ast;
-  long double d;
+  calc_value_t d;
 }
 
 %token <d> NUM
@@ -29,7 +28,11 @@
 
 %%
 
-calclist: exp { long double *res = astget_extra (scanner); *res = ast_eval ($1); ast_free ($1); }
+calclist: exp {
+  long double *res = astget_extra (scanner);
+  *res = ast_eval ($1);
+  ast_free ($1);
+}
 
 exp:
   NUM               { $$ = numval_create ($1);       }

@@ -3,8 +3,7 @@
 %option prefix="parser"
 
 %{
-  #include "parser_type.h"
-  #include "parser.tab.h"
+  #include "parser.h"
 %}
 
 EXP ([Ee][-+]?[0-9]+)

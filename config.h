@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <stdlib.h>
+typedef long double calc_value_t;
 
 typedef enum {
     MODE_PARSER,
@@ -10,9 +10,9 @@ typedef enum {
 
 typedef struct config_t {
     char *expr;
-    long double result;
+    calc_value_t result;
     calc_mode_t mode;
-    size_t iteration_number;
+    unsigned long iteration_number;
 } config_t;
 
 #endif // CONFIG_H

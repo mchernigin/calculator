@@ -6,7 +6,7 @@
 #undef YYSTYPE
 #endif
 
-#define PARSERSTYPE long double
+#define PARSERSTYPE calc_value_t
 #define YYSTYPE PARSERSTYPE
 
 #endif // PARSER_TYPE_H

@@ -1,5 +1,4 @@
 #include "ast.h"
-#include "ast.tab.h"
 #include "ast.lex.h"
 
 ast_t *
@@ -20,7 +19,7 @@ ast_create (int nodetype, ast_t *left, ast_t *right)
 }
 
 ast_t *
-numval_create (long double value)
+numval_create (calc_value_t value)
 {
     numval_t *numval = malloc (sizeof (numval_t));
 
@@ -35,11 +34,10 @@ numval_create (long double value)
     return ((ast_t *) numval);
 }
 
-long double
+calc_value_t
 ast_eval (ast_t *ast)
 {
-    switch (ast->nodetype)
-    {
+    switch (ast->nodetype) {
     case 'K': return (((numval_t *) ast)->number);
     case '+': return (ast_eval (ast->left) + ast_eval (ast->right));
     case '-': return (ast_eval (ast->left) - ast_eval (ast->right));
@@ -55,8 +53,7 @@ ast_eval (ast_t *ast)
 void
 ast_free (ast_t *ast)
 {
-    switch (ast->nodetype)
-    {
+    switch (ast->nodetype) {
     case '+':
     case '-':
     case '*':
@@ -74,27 +71,27 @@ ast_free (ast_t *ast)
     }
 }
 
-bool
+int
 run_ast (config_t *config)
 {
     yyscan_t scanner = NULL;
 
     if (astlex_init_extra (&config->result, &scanner)) {
         fprintf (stderr, "ERROR: cannot initialize scanner\n");
-        return (false);
+        return (EXIT_FAILURE);
     }
 
     for (size_t i = 0; i < config->iteration_number; ++i) {
         if (ast_scan_string (config->expr, scanner) == NULL) {
             fprintf (stderr, "ERROR: cannot set string to parse\n");
-            return (false);
+            return (EXIT_FAILURE);
         }
 
         if (astparse (scanner)) {
             fprintf (stderr, "ERROR: cannot parse string\n");
-            return (false);
+            return (EXIT_FAILURE);
         }
     }
 
-    return (true);
+    return (EXIT_SUCCESS);
 }
