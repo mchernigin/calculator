@@ -77,8 +77,8 @@ ast_free (ast_t *ast)
 void
 run_ast (config_t *config)
 {
-    puts("AST");
     yyscan_t scanner = NULL;
+    astlex_init (&scanner);
 
     for (size_t i = 0; i < config->iteration_number; ++i) {
         ast_scan_string (config->expr, scanner);

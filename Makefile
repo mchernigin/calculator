@@ -10,7 +10,7 @@ YACC = bison
 	$(LEX) --header-file=$*.lex.h -o $*.lex.c $<
 
 %.tab.h %.tab.c: %.y
-	$(YACC) -d $<
+	$(YACC) -Wall -d $<
 
 main: main.o parser.lex.o ast.lex.o parser.tab.o ast.tab.o parser.o ast.o 
 
