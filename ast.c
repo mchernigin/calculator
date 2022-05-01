@@ -1,5 +1,6 @@
 #include "ast.h"
 #include "ast.tab.h"
+#include "ast.lex.h"
 
 ast_t *
 ast_create (int nodetype, ast_t *left, ast_t *right)
@@ -61,8 +62,10 @@ ast_free (ast_t *ast)
     case '*':
     case '/':
         ast_free (ast->right);
+        __attribute__ ((fallthrough));
     case 'N':
         ast_free (ast->left);
+        __attribute__ ((fallthrough));
     case 'K':
         free (ast);
         break;
@@ -78,7 +81,7 @@ run_ast (config_t *config)
     yyscan_t scanner = NULL;
 
     for (size_t i = 0; i < config->iteration_number; ++i) {
-        yy_scan_string (config->expr, scanner);
+        ast_scan_string (config->expr, scanner);
         astparse (scanner);
     }
 }

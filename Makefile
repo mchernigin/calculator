@@ -1,5 +1,5 @@
 CC = cc
-CFLAGS = -Wall -Wextra -g
+CFLAGS = -Wall -Wextra
 LEX = flex
 YACC = bison
 
@@ -9,7 +9,7 @@ YACC = bison
 %.tab.h %.tab.c: %.y
 	$(YACC) -d $<
 
-main: main.o parser.lex.o ast.lex.o parser.tab.o ast.tab.o parser.o ast.o
+main: main.o parser.lex.o ast.lex.o parser.tab.o ast.tab.o parser.o ast.o 
 
 main.c: parser.lex.h parser.tab.h ast.lex.h ast.tab.h
 

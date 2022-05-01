@@ -1,6 +1,7 @@
 %{
   #include <stdio.h>
   #include "parser_type.h"
+  #include "parser.tab.h"
   #include "parser.lex.h"
 
   void
