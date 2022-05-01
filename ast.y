@@ -15,7 +15,7 @@
 %define api.pure full
 
 %union {
-  ast_t *ast;
+  ast_node_t *ast;
   calc_value_t d;
 }
 
@@ -35,13 +35,13 @@ calclist: exp {
 }
 
 exp:
-  NUM               { $$ = numval_create ($1);       }
-| exp '+' exp       { $$ = ast_create ('+', $1, $3); }
-| exp '-' exp       { $$ = ast_create ('-', $1, $3); }
-| exp '*' exp       { $$ = ast_create ('*', $1, $3); }
-| exp '/' exp       { $$ = ast_create ('/', $1, $3); }
-| '-' exp %prec NEG { $$ = ast_create ('N', $2, NULL); }
-| '(' exp ')'       { $$ = $2;                       }
+  NUM               { $$ = node_value_create ($1);            }
+| exp '+' exp       { $$ = node_op_create (NT_PLUS, $1, $3);  }
+| exp '-' exp       { $$ = node_op_create (NT_MINUS, $1, $3); }
+| exp '*' exp       { $$ = node_op_create (NT_MUL, $1, $3);   }
+| exp '/' exp       { $$ = node_op_create (NT_DIV, $1, $3);   }
+| '-' exp %prec NEG { $$ = node_op_create (NT_NEG, $2, NULL); }
+| '(' exp ')'       { $$ = $2;                                }
 ;
 
 %%

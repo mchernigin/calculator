@@ -1,69 +1,69 @@
 #include "ast.h"
 #include "ast.lex.h"
 
-ast_t *
-ast_create (int nodetype, ast_t *left, ast_t *right)
+ast_node_t *
+node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)
 {
-    ast_t *ast = malloc (sizeof (ast_t));
+    ast_node_t *node = malloc (sizeof (ast_node_t));
 
-    if (!ast) {
-        fprintf (stderr, "ERROR: Can not create ast: not enough memory\n");
+    if (!node) {
+        fprintf (stderr, "ERROR: Can not create a node: not enough memory\n");
         return (NULL);
     }
 
-    ast->nodetype = nodetype;
-    ast->left = left;
-    ast->right = right;
+    node->node_type = node_type;
+    node->left = left;
+    node->right = right;
 
-    return (ast);
+    return (node);
 }
 
-ast_t *
-numval_create (calc_value_t value)
+ast_node_t *
+node_value_create (calc_value_t value)
 {
-    numval_t *numval = malloc (sizeof (numval_t));
+    ast_node_t *node = malloc (sizeof (ast_node_t));
 
-    if (!numval) {
-        fprintf (stderr, "ERROR: Can not create numval: not enough memory\n");
+    if (!node) {
+        fprintf (stderr, "ERROR: Can not create a node: not enough memory\n");
         return (NULL);
     }
 
-    numval->nodetype = 'K';
-    numval->number = value;
+    node->node_type = NT_NUM;
+    node->value = value;
 
-    return ((ast_t *) numval);
+    return (node);
 }
 
 calc_value_t
-ast_eval (ast_t *ast)
+ast_eval (ast_node_t *ast)
 {
-    switch (ast->nodetype) {
-    case 'K': return (((numval_t *) ast)->number);
-    case '+': return (ast_eval (ast->left) + ast_eval (ast->right));
-    case '-': return (ast_eval (ast->left) - ast_eval (ast->right));
-    case '*': return (ast_eval (ast->left) * ast_eval (ast->right));
-    case '/': return (ast_eval (ast->left) / ast_eval (ast->right));
-    case 'N': return (-ast_eval (ast->left));
-    default: fprintf (stderr, "ERROR: Unknown ast nodetype\n");
+    switch (ast->node_type) {
+    case NT_NUM:   return (ast->value);
+    case NT_PLUS:  return (ast_eval (ast->left) + ast_eval (ast->right));
+    case NT_MINUS: return (ast_eval (ast->left) - ast_eval (ast->right));
+    case NT_MUL:   return (ast_eval (ast->left) * ast_eval (ast->right));
+    case NT_DIV:   return (ast_eval (ast->left) / ast_eval (ast->right));
+    case NT_NEG:   return (-ast_eval (ast->left));
+    default: fprintf (stderr, "ERROR: Unknown ast node type\n");
     }
 
     return (0);
 }
 
 void
-ast_free (ast_t *ast)
+ast_free (ast_node_t *ast)
 {
-    switch (ast->nodetype) {
-    case '+':
-    case '-':
-    case '*':
-    case '/':
+    switch (ast->node_type) {
+    case NT_PLUS:
+    case NT_MINUS:
+    case NT_MUL:
+    case NT_DIV:
         ast_free (ast->right);
         __attribute__ ((fallthrough));
-    case 'N':
+    case NT_NEG:
         ast_free (ast->left);
         __attribute__ ((fallthrough));
-    case 'K':
+    case NT_NUM:
         free (ast);
         break;
     default:
@@ -83,7 +83,7 @@ run_ast (config_t *config)
 
     for (size_t i = 0; i < config->iteration_number; ++i) {
         if (ast_scan_string (config->expr, scanner) == NULL) {
-            fprintf (stderr, "ERROR: cannot set string to parse\n");
+            fprintf (stderr, "ERROR: cannot scan given string\n");
             return (EXIT_FAILURE);
         }
 

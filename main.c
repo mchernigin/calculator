@@ -3,8 +3,8 @@
 #include <getopt.h>
 
 #include "config.h"
-#include "ast.h"
 #include "parser.h"
+#include "ast.h"
 
 int
 parse_args (config_t *config, int argc, char *argv[])

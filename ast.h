@@ -3,24 +3,33 @@
 
 #include "config.h"
 
-typedef struct ast_t {
-    int nodetype;
-    struct ast_t *left;
-    struct ast_t *right;
-} ast_t;
+typedef enum {
+    NT_NUM,
+    NT_PLUS,
+    NT_MINUS,
+    NT_MUL,
+    NT_DIV,
+    NT_NEG,
+} node_type_t;
 
-typedef struct numval_t {
-    int nodetype;
-    calc_value_t number;
-} numval_t;
+typedef struct ast_node_t {
+    node_type_t node_type;
+    union {
+        calc_value_t value;
+        struct {
+            struct ast_node_t *left;
+            struct ast_node_t *right;
+        };
+    };
+} ast_node_t;
 
 #define YYSTYPE ASTSTYPE
 #include "ast.tab.h"
 
-ast_t *ast_create (int nodetype, ast_t *left, ast_t *right);
-ast_t *numval_create (calc_value_t value);
-calc_value_t ast_eval (ast_t *ast);
-void ast_free (ast_t *ast);
+ast_node_t *node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right);
+ast_node_t *node_value_create (calc_value_t value);
+calc_value_t ast_eval (ast_node_t *ast);
+void ast_free (ast_node_t *ast);
 int run_ast (config_t *config);
 
 #endif // AST_H
