@@ -29,9 +29,8 @@
 %%
 
 calclist: exp {
-  long double *res = astget_extra (scanner);
-  *res = ast_eval ($1);
-  ast_free ($1);
+  ast_node_t **res = astget_extra (scanner);
+  *res = $1;
 }
 
 exp:

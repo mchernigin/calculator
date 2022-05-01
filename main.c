@@ -4,6 +4,7 @@
 
 #include "config.h"
 #include "parser.h"
+#undef YYSTYPE
 #include "ast.h"
 
 int

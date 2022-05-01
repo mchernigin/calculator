@@ -44,7 +44,7 @@ ast_eval (ast_node_t *ast)
     case NT_MUL:   return (ast_eval (ast->left) * ast_eval (ast->right));
     case NT_DIV:   return (ast_eval (ast->left) / ast_eval (ast->right));
     case NT_NEG:   return (-ast_eval (ast->left));
-    default: fprintf (stderr, "ERROR: Unknown ast node type\n");
+    default: fprintf (stderr, "ERROR: Unknown ast node type %d\n", ast->node_type);
     }
 
     return (0);
@@ -75,23 +75,28 @@ int
 run_ast (config_t *config)
 {
     yyscan_t scanner = NULL;
+    ast_node_t *ast = NULL;
 
-    if (astlex_init_extra (&config->result, &scanner)) {
+    if (astlex_init_extra (&ast, &scanner)) {
         fprintf (stderr, "ERROR: cannot initialize scanner\n");
         return (EXIT_FAILURE);
     }
 
-    for (size_t i = 0; i < config->iteration_number; ++i) {
-        if (ast_scan_string (config->expr, scanner) == NULL) {
-            fprintf (stderr, "ERROR: cannot scan given string\n");
-            return (EXIT_FAILURE);
-        }
-
-        if (astparse (scanner)) {
-            fprintf (stderr, "ERROR: cannot parse string\n");
-            return (EXIT_FAILURE);
-        }
+    if (ast_scan_string (config->expr, scanner) == NULL) {
+        fprintf (stderr, "ERROR: cannot scan given string\n");
+        return (EXIT_FAILURE);
     }
+
+    if (astparse (scanner)) {
+        fprintf (stderr, "ERROR: cannot parse string\n");
+        return (EXIT_FAILURE);
+    }
+
+    for (size_t i = 0; i < config->iteration_number; ++i) {
+        config->result = ast_eval(ast);
+    }
+
+    ast_free(ast);
 
     return (EXIT_SUCCESS);
 }
