@@ -5,5 +5,6 @@ journal/
 *.tab.[cho]
 *.lex.[cho]
 ast.o
+parser.o
 main.o
 main

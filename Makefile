@@ -3,6 +3,9 @@ CFLAGS = -Wall -Wextra
 LEX = flex
 YACC = bison
 
+%.c: %.y
+%.c: %.l
+
 %.lex.h %.lex.c: %.l
 	$(LEX) --header-file=$*.lex.h -o $*.lex.c $<
 
