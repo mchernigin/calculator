@@ -8,3 +8,8 @@ ast.o
 parser.o
 main.o
 main
+main.dSYM
+
+__pycache__
+.ipynb_checkpoints
+venv

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <time.h>
 
 #include "config.h"
 #include "parser.h"
@@ -57,6 +58,7 @@ main (int argc, char *argv[])
         return (EXIT_FAILURE);
     }
 
+    clock_t begin = clock();
     int returned;
     switch (config.mode) {
     case MODE_PARSER:
@@ -69,12 +71,15 @@ main (int argc, char *argv[])
         fprintf (stderr, "ERROR: Unexpected calculator mode\n");
         return (EXIT_FAILURE);
     }
+    clock_t end = clock();
+    double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
 
     if (returned != 0) {
         return (EXIT_FAILURE);
     }
 
     printf ("%Lg\n", config.result);
+    fprintf(stderr, "%g\n", time_spent);
 
     return (EXIT_SUCCESS);
 }
