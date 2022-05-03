@@ -51,11 +51,11 @@ def benchmark(cfg, mode, flag, sizes):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--seed', help='Random seed', type=int, default=0)
-    parser.add_argument('-n', '--numcalc', help='Number of calculations', type=int, default=100_000)
-    parser.add_argument('-m', '--min', help='Minimal expression length', type=int, default=10)
-    parser.add_argument('-M', '--max', help='Maximum expression length', type=int, default=250)
-    parser.add_argument('-o', '--output', help='Output file', type=str, default='graph.png')
+    parser.add_argument('-s', '--seed', help='random seed', type=int, default=0)
+    parser.add_argument('-n', '--numcalc', help='number of calculations', type=int, default=100_000)
+    parser.add_argument('-m', '--min', help='minimal expression length', type=int, default=10)
+    parser.add_argument('-M', '--max', help='maximum expression length', type=int, default=250)
+    parser.add_argument('-o', '--output', help='output file', type=str, default='graph.png')
     cfg = parser.parse_args()
 
     sizes = [x for x in range(cfg.min, cfg.max + 1, (cfg.max - cfg.min) // 25)]

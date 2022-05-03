@@ -7,7 +7,7 @@ node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)
     ast_node_t *node = malloc (sizeof (ast_node_t));
 
     if (!node) {
-        fprintf (stderr, "ERROR: Can not create a node: not enough memory\n");
+        fprintf (stderr, "ERROR: cannot create a node: not enough memory\n");
         return (NULL);
     }
 
@@ -24,7 +24,7 @@ node_value_create (calc_value_t value)
     ast_node_t *node = malloc (sizeof (ast_node_t));
 
     if (!node) {
-        fprintf (stderr, "ERROR: Can not create a node: not enough memory\n");
+        fprintf (stderr, "ERROR: cannot create a node: not enough memory\n");
         return (NULL);
     }
 
@@ -44,7 +44,7 @@ ast_eval (ast_node_t *ast)
     case NT_MUL:   return (ast_eval (ast->left) * ast_eval (ast->right));
     case NT_DIV:   return (ast_eval (ast->left) / ast_eval (ast->right));
     case NT_NEG:   return (-ast_eval (ast->left));
-    default: fprintf (stderr, "ERROR: Unknown ast node type %d\n", ast->node_type);
+    default: fprintf (stderr, "ERROR: unknown ast node type %d\n", ast->node_type);
     }
 
     return (0);
@@ -67,7 +67,7 @@ ast_free (ast_node_t *ast)
         free (ast);
         break;
     default:
-        fprintf (stderr, "ERROR: Unknown ast nodetype\n");
+        fprintf (stderr, "ERROR: unknown ast node type\n");
     }
 }
 

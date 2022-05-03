@@ -8,13 +8,25 @@
 #undef YYSTYPE
 #include "ast.h"
 
+#define USAGE {                                                                \
+    printf ("usage: %s [-h] [-pa] [-n NUM] expression\n\n", argv[0]);          \
+    printf ("optional arguments:\n");                                          \
+    printf ("  -h,     show this help message and exit\n");                    \
+    printf ("  -p,     use basic parser mode (default)\n");                    \
+    printf ("  -a,     use AST mode\n");                                       \
+    printf ("  -n NUM, number of calculations\n");                             \
+}
+
 int
 parse_args (config_t *config, int argc, char *argv[])
 {
     opterr = 0;     // Silence getopt error printing
     int opt;
-    while ((opt = getopt(argc, argv, "n:pa")) != -1) {
+    while ((opt = getopt(argc, argv, "hpan:")) != -1) {
         switch (opt) {
+        case 'h':
+            USAGE;
+            return (EXIT_FAILURE);
         case 'p':
             config->mode = MODE_PARSER;
             break;
@@ -27,13 +39,15 @@ parse_args (config_t *config, int argc, char *argv[])
             config->iteration_number = strtoul (optarg, &end, 10);
             if (*end != '\0') {
                 fprintf (stderr, "ERROR: n is not an integer\n");
+                USAGE;
                 return (EXIT_FAILURE);
             }
             break;
         }
         case '?':
         default:
-            fprintf (stderr, "ERROR: Unexpected flag\n");
+            fprintf (stderr, "ERROR: unexpected flag\n");
+            USAGE;
             return (EXIT_FAILURE);
         }
     }
@@ -41,6 +55,7 @@ parse_args (config_t *config, int argc, char *argv[])
     config->expr = argv[optind];
     if (!config->expr) {
         fprintf (stderr, "ERROR: no expression was provided\n");
+        USAGE;
         return (EXIT_FAILURE);
     }
 
