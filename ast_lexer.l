@@ -3,7 +3,7 @@
 %option prefix="ast"
 
 %{
-  #include "ast.h"
+    #include "ast_calc.h"
 %}
 
 EXP ([Ee][-+]?[0-9]+)

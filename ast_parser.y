@@ -1,13 +1,13 @@
-%code top {
-  #include "ast.h"
-  #include "ast.lex.h"
+%{
+    #include "ast_calc.h"
+    #include "ast_lexer.lex.h"
 
-  void
-  asterror (__attribute__((unused)) yyscan_t scanner, const char *msg)
-  {
-    fprintf (stderr, "ERROR: %s\n", msg);
-  }
-}
+    void
+    asterror (__attribute__ ((unused)) yyscan_t scanner, const char *msg)
+    {
+        fprintf (stderr, "ERROR: %s\n", msg);
+    }
+%}
 
 %param {void *scanner}
 %define api.token.prefix {AST}
@@ -15,8 +15,8 @@
 %define api.pure full
 
 %union {
-  ast_node_t *ast;
-  calc_value_t d;
+    ast_node_t *ast;
+    calc_value_t d;
 }
 
 %token <d> NUM
@@ -29,8 +29,8 @@
 %%
 
 calclist: exp {
-  ast_node_t **res = astget_extra (scanner);
-  *res = $1;
+    ast_node_t **res = astget_extra (scanner);
+    *res = $1;
 }
 
 exp:

@@ -1,12 +1,12 @@
 %{
-  #include "parser.h"
-  #include "parser.lex.h"
+    #include "basic_calc.h"
+    #include "basic_lexer.lex.h"
 
-  void
-  yyerror (__attribute__((unused)) yyscan_t scanner, const char *msg)
-  {
-    fprintf (stderr, "ERROR: %s\n", msg);
-  }
+    void
+    yyerror (__attribute__ ((unused)) yyscan_t scanner, const char *msg)
+    {
+        fprintf (stderr, "ERROR: %s\n", msg);
+    }
 %}
 
 %param {void *scanner}
@@ -22,7 +22,10 @@
 
 %%
 
-calclist: exp { PARSERSTYPE *res = parserget_extra (scanner); *res = $1; }
+calclist: exp {
+    PARSERSTYPE *res = parserget_extra (scanner);
+    *res = $1;
+}
 
 exp:
   NUM               { $$ = $1;      }

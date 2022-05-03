@@ -1,5 +1,5 @@
-#include "parser.h"
-#include "parser.lex.h"
+#include "basic_calc.h"
+#include "basic_lexer.lex.h"
 
 int
 run_parser (config_t *config)

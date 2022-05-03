@@ -4,9 +4,9 @@
 #include <time.h>
 
 #include "config.h"
-#include "parser.h"
+#include "basic_calc.h"
 #undef YYSTYPE
-#include "ast.h"
+#include "ast_calc.h"
 
 #define USAGE {                                                                \
     printf ("usage: %s [-h] [-pa] [-n NUM] expression\n\n", argv[0]);          \
@@ -22,7 +22,7 @@ parse_args (config_t *config, int argc, char *argv[])
 {
     opterr = 0;     // Silence getopt error printing
     int opt;
-    while ((opt = getopt(argc, argv, "hpan:")) != -1) {
+    while ((opt = getopt (argc, argv, "hpan:")) != -1) {
         switch (opt) {
         case 'h':
             USAGE;
@@ -73,7 +73,7 @@ main (int argc, char *argv[])
         return (EXIT_FAILURE);
     }
 
-    clock_t begin = clock();
+    clock_t begin = clock ();
     int returned;
     switch (config.mode) {
     case MODE_PARSER:
@@ -86,7 +86,7 @@ main (int argc, char *argv[])
         fprintf (stderr, "ERROR: Unexpected calculator mode\n");
         return (EXIT_FAILURE);
     }
-    clock_t end = clock();
+    clock_t end = clock ();
     double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
 
     if (returned != 0) {
@@ -94,7 +94,7 @@ main (int argc, char *argv[])
     }
 
     printf ("%Lg\n", config.result);
-    fprintf(stderr, "%g\n", time_spent);
+    fprintf (stderr, "%g\n", time_spent);
 
     return (EXIT_SUCCESS);
 }

@@ -13,3 +13,5 @@ main.dSYM
 __pycache__
 .ipynb_checkpoints
 venv
+
+graph.png

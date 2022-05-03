@@ -1,10 +1,10 @@
-#include "ast.h"
-#include "ast.lex.h"
+#include "ast_calc.h"
+#include "ast_lexer.lex.h"
 
 ast_node_t *
 node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)
 {
-    ast_node_t *node = malloc (sizeof (ast_node_t));
+    ast_node_t *node = malloc (sizeof (*node));
 
     if (!node) {
         fprintf (stderr, "ERROR: cannot create a node: not enough memory\n");
@@ -21,7 +21,7 @@ node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)
 ast_node_t *
 node_value_create (calc_value_t value)
 {
-    ast_node_t *node = malloc (sizeof (ast_node_t));
+    ast_node_t *node = malloc (sizeof (*node));
 
     if (!node) {
         fprintf (stderr, "ERROR: cannot create a node: not enough memory\n");
@@ -44,7 +44,8 @@ ast_eval (ast_node_t *ast)
     case NT_MUL:   return (ast_eval (ast->left) * ast_eval (ast->right));
     case NT_DIV:   return (ast_eval (ast->left) / ast_eval (ast->right));
     case NT_NEG:   return (-ast_eval (ast->left));
-    default: fprintf (stderr, "ERROR: unknown ast node type %d\n", ast->node_type);
+    default:
+        fprintf (stderr, "ERROR: unknown ast node type %d\n", ast->node_type);
     }
 
     return (0);
@@ -93,7 +94,7 @@ run_ast (config_t *config)
     }
 
     for (size_t i = 0; i < config->iteration_number; ++i) {
-        config->result = ast_eval(ast);
+        config->result = ast_eval (ast);
     }
 
     ast_free(ast);
