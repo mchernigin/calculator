@@ -1,6 +1,6 @@
 %{
     #include "ast_calc.h"
-    #include "ast_lexer.lex.h"
+    #include "ast_lexer.h"
 
     void
     asterror (__attribute__ ((unused)) yyscan_t scanner, const char *msg)

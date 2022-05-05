@@ -2,8 +2,6 @@ import argparse
 import random
 import subprocess
 import sys
-from numpy import size
-import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -29,8 +27,7 @@ def gen_exp(numberop, boundary=10, use_float=True, precision=3):
     exp += ')' * (parant_count + 1)
     return exp
 
-def draw_progress(count, total):
-    bar_len = 20
+def draw_progress(count, total, bar_len=20):
     filled_len = round(bar_len * count / float(total))
     percents = int(round(100.0 * count / float(total), 1))
     bar = '=' * filled_len + ' ' * (bar_len - filled_len)
@@ -72,6 +69,7 @@ def main():
     ax.set_ylabel('Time')
     plt.legend(labels=["Basic parser", "AST parser"])
 
+    ax.grid(visible=True, color='#DDDDDD')
     plt.savefig(cfg.output, dpi=600)
     print(f'Result has been saved into {cfg.output!r}')
 

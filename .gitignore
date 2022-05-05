@@ -2,11 +2,9 @@
 .vscode/
 journal/
 
-*.tab.[cho]
-*.lex.[cho]
-ast.o
-parser.o
-main.o
+*.o
+*parser.[ch]
+*lexer.[ch]
 main
 main.dSYM
 

@@ -1,6 +1,6 @@
 %{
     #include "basic_calc.h"
-    #include "basic_lexer.lex.h"
+    #include "basic_lexer.h"
 
     void
     yyerror (__attribute__ ((unused)) yyscan_t scanner, const char *msg)

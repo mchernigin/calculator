@@ -6,16 +6,15 @@ YACC = bison
 %.c: %.y
 %.c: %.l
 
-%.lex.h %.lex.c: %.l
-	$(LEX) --header-file=$*.lex.h -o $*.lex.c $<
+%lexer.h %lexer.c: %lexer.l
+	$(LEX) --header-file=$*lexer.h -o $*lexer.c $<
 
-%.tab.h %.tab.c: %.y
-	$(YACC) -Wall -d $<
+%parser.h %parser.c: %parser.y
+	$(YACC) -Wall -o $*parser.c -d $<
 
-main: main.o basic_lexer.lex.o ast_lexer.lex.o basic_parser.tab.o ast_parser.tab.o basic_calc.o ast_calc.o 
-
-main.c: basic_lexer.lex.h basic_parser.tab.h ast_lexer.lex.h ast_parser.tab.h
+main: main.o basic_lexer.o ast_lexer.o basic_parser.o ast_parser.o basic_calc.o ast_calc.o 
+main.c: basic_lexer.h basic_parser.h ast_lexer.h ast_parser.h
 
 .PHONY: clean
 clean:
-	rm -rf *.tab.[cho] *.lex.[cho] ast_calc.o basic_calc.o main.o main
+	$(RM) *.o *lexer.[ch] *parser.[ch] main

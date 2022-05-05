@@ -1,5 +1,5 @@
 #include "ast_calc.h"
-#include "ast_lexer.lex.h"
+#include "ast_lexer.h"
 
 ast_node_t *
 node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)

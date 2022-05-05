@@ -2,7 +2,7 @@
 #define PARSER_H
 
 #include "config.h"
-#include "basic_parser.tab.h"
+#include "basic_parser.h"
 
 #define PARSERSTYPE calc_value_t
 #define YYSTYPE PARSERSTYPE
