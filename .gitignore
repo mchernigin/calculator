@@ -2,7 +2,14 @@
 .vscode/
 journal/
 
-*.tab.*
-*.yy.*
-calc
-calc.output
+*.o
+*parser.[ch]
+*lexer.[ch]
+main
+main.dSYM
+
+__pycache__
+.ipynb_checkpoints
+venv
+
+graph.png

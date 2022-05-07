@@ -1,13 +1,20 @@
-CC=cc
-LEX=flex
-YACC=bison
+CC = cc
+CFLAGS = -Wall -Wextra
+LEX = flex
+YACC = bison
 
-all: calc
+%.c: %.y
+%.c: %.l
 
-calc: calc.y calc.l
-	$(YACC) -d calc.y
-	$(LEX) calc.l
-	$(CC) -o $@ calc.tab.c lex.yy.c -ll
+%lexer.h %lexer.c: %lexer.l
+	$(LEX) --header-file=$*lexer.h -o $*lexer.c $<
 
+%parser.h %parser.c: %parser.y
+	$(YACC) -Wall -o $*parser.c -d $<
+
+main: main.o basic_lexer.o ast_lexer.o basic_parser.o ast_parser.o basic_calc.o ast_calc.o 
+main.c: basic_lexer.h basic_parser.h ast_lexer.h ast_parser.h
+
+.PHONY: clean
 clean:
-	rm -f calc *.tab.? *.yy.?
+	$(RM) *.o *lexer.[ch] *parser.[ch] main
