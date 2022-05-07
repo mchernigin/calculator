@@ -1,33 +1,35 @@
-#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <getopt.h>
-#include <assert.h>
-#include <unistd.h>
+#include <time.h>
 
-#include "ast.h"
-#include "calc.tab.h"
-#include "calc.lex.h"
+#include "config.h"
+#include "basic_calc.h"
+#undef YYSTYPE
+#include "ast_calc.h"
 
-typedef enum {
-    MODE_PARSER,
-    MODE_AST,
-} calc_mode_t;
+#define USAGE {                                                                \
+    printf ("usage: %s [-h] [-ba] [-t] [-n NUM] expression\n\n", argv[0]);     \
+    printf ("optional arguments:\n");                                          \
+    printf ("  -h,     show this help message and exit\n");                    \
+    printf ("  -b,     use basic parser mode (default)\n");                    \
+    printf ("  -a,     use AST parser mode\n");                                \
+    printf ("  -t,     print calculation time to stderr\n");                   \
+    printf ("  -n NUM, number of calculations\n");                             \
+}
 
-typedef struct config_t {
-    char *expr;
-    calc_mode_t mode;
-    size_t iteration_number;
-} config_t;
-
-bool
+int
 parse_args (config_t *config, int argc, char *argv[])
 {
     opterr = 0;     // Silence getopt error printing
     int opt;
-    while ((opt = getopt(argc, argv, "n:pa")) != -1) {
+    while ((opt = getopt (argc, argv, "hban:t")) != -1) {
         switch (opt) {
-        case 'p':
-            config->mode = MODE_PARSER;
+        case 'h':
+            USAGE;
+            return (EXIT_FAILURE);
+        case 'b':
+            config->mode = MODE_BASIC;
             break;
         case 'a':
             config->mode = MODE_AST;
@@ -38,44 +40,30 @@ parse_args (config_t *config, int argc, char *argv[])
             config->iteration_number = strtoul (optarg, &end, 10);
             if (*end != '\0') {
                 fprintf (stderr, "ERROR: n is not an integer\n");
-                return (false);
+                USAGE;
+                return (EXIT_FAILURE);
             }
             break;
         }
+        case 't':
+            config->print_time = true;
+            break;
         case '?':
         default:
-            fprintf (stderr, "ERROR: Unexpected flag\n");
-            return (false);
+            fprintf (stderr, "ERROR: unexpected flag\n");
+            USAGE;
+            return (EXIT_FAILURE);
         }
     }
 
     config->expr = argv[optind];
     if (!config->expr) {
         fprintf (stderr, "ERROR: no expression was provided\n");
-        return (false);
+        USAGE;
+        return (EXIT_FAILURE);
     }
 
-    return (true);
-}
-
-void
-run_parser (config_t *config)
-{
-    puts("PARSER");
-    for (size_t i = 0; i < config->iteration_number; ++i) {
-        yy_scan_string (config->expr);
-        yyparse ();
-    }
-}
-
-void
-run_ast (config_t *config)
-{
-    puts("AST");
-    for (size_t i = 0; i < config->iteration_number; ++i) {
-        yy_scan_string (config->expr);
-        yyparse ();
-    }
+    return (EXIT_SUCCESS);
 }
 
 int
@@ -83,22 +71,37 @@ main (int argc, char *argv[])
 {
     config_t config = {
         .iteration_number = 1,
-        .mode = MODE_PARSER,
+        .mode = MODE_BASIC,
+        .print_time = false,
     };
-    if (!parse_args (&config, argc, argv)) {
+    if (parse_args (&config, argc, argv) != 0) {
         return (EXIT_FAILURE);
     }
 
+    clock_t begin = clock ();
+
+    int returned;
     switch (config.mode) {
-    case MODE_PARSER:
-        run_parser (&config);
+    case MODE_BASIC:
+        returned = run_basic (&config);
         break;
     case MODE_AST:
-        run_ast (&config);
+        returned = run_ast (&config);
         break;
-    default:
-        fprintf (stderr, "ERROR: Unexpected calculator mode\n");
+    default: // MODE_BASIC by default and can only be switched to MODE_AST
+        __builtin_unreachable ();
+    }
+
+    if (returned != 0) {
         return (EXIT_FAILURE);
+    }
+
+    clock_t end = clock ();
+    double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
+
+    printf ("%Lg\n", config.result);
+    if (config.print_time) {
+        fprintf (stderr, "%g", time_spent);
     }
 
     return (EXIT_SUCCESS);
