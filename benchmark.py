@@ -39,7 +39,7 @@ def benchmark(cfg, mode, flag, sizes):
     time = []
     for i, numberop in enumerate(sizes):
         exp = gen_exp(numberop)
-        cmd = ['./main', flag, '-n', str(cfg.numcalc), exp]
+        cmd = ['./main', '-t', flag, '-n', str(cfg.numcalc), exp]
         result = subprocess.run(cmd, capture_output=True)
         time.append(float(result.stderr.decode().strip()))
         print(f'Running {mode} version', end='\t')

@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <stdbool.h>
+
 typedef long double calc_value_t;
 
 typedef enum {
@@ -13,6 +15,7 @@ typedef struct config_t {
     calc_value_t result;
     calc_mode_t mode;
     unsigned long iteration_number;
+    bool print_time;
 } config_t;
 
 #endif // CONFIG_H

@@ -9,11 +9,12 @@
 #include "ast_calc.h"
 
 #define USAGE {                                                                \
-    printf ("usage: %s [-h] [-ba] [-n NUM] expression\n\n", argv[0]);          \
+    printf ("usage: %s [-h] [-ba] [-t] [-n NUM] expression\n\n", argv[0]);     \
     printf ("optional arguments:\n");                                          \
     printf ("  -h,     show this help message and exit\n");                    \
     printf ("  -b,     use basic parser mode (default)\n");                    \
     printf ("  -a,     use AST parser mode\n");                                \
+    printf ("  -t,     print calculation time to stderr\n");                   \
     printf ("  -n NUM, number of calculations\n");                             \
 }
 
@@ -22,7 +23,7 @@ parse_args (config_t *config, int argc, char *argv[])
 {
     opterr = 0;     // Silence getopt error printing
     int opt;
-    while ((opt = getopt (argc, argv, "hban:")) != -1) {
+    while ((opt = getopt (argc, argv, "hban:t")) != -1) {
         switch (opt) {
         case 'h':
             USAGE;
@@ -44,6 +45,9 @@ parse_args (config_t *config, int argc, char *argv[])
             }
             break;
         }
+        case 't':
+            config->print_time = true;
+            break;
         case '?':
         default:
             fprintf (stderr, "ERROR: unexpected flag\n");
@@ -68,12 +72,14 @@ main (int argc, char *argv[])
     config_t config = {
         .iteration_number = 1,
         .mode = MODE_BASIC,
+        .print_time = false,
     };
     if (parse_args (&config, argc, argv) != 0) {
         return (EXIT_FAILURE);
     }
 
     clock_t begin = clock ();
+
     int returned;
     switch (config.mode) {
     case MODE_BASIC:
@@ -83,17 +89,20 @@ main (int argc, char *argv[])
         returned = run_ast (&config);
         break;
     default: // MODE_BASIC by default and can only be switched to MODE_AST
-        __builtin_unreachable();
+        __builtin_unreachable ();
     }
-    clock_t end = clock ();
-    double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
 
     if (returned != 0) {
         return (EXIT_FAILURE);
     }
 
+    clock_t end = clock ();
+    double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
+
     printf ("%Lg\n", config.result);
-    fprintf (stderr, "%g", time_spent);
+    if (config.print_time) {
+        fprintf (stderr, "%g", time_spent);
+    }
 
     return (EXIT_SUCCESS);
 }
