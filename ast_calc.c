@@ -60,10 +60,10 @@ ast_free (ast_node_t *ast)
     case NT_MUL:
     case NT_DIV:
         ast_free (ast->right);
-        __attribute__ ((fallthrough));
+        __attribute__ ((fallthrough)); // Intend to fall through
     case NT_NEG:
         ast_free (ast->left);
-        __attribute__ ((fallthrough));
+        __attribute__ ((fallthrough)); // Intend to fall through
     case NT_NUM:
         free (ast);
         break;
@@ -97,7 +97,7 @@ run_ast (config_t *config)
         config->result = ast_eval (ast);
     }
 
-    ast_free(ast);
+    ast_free (ast);
 
     return (EXIT_SUCCESS);
 }

@@ -10,7 +10,7 @@
 %}
 
 %param {void *scanner}
-%define api.prefix {parser}
+%define api.prefix {basic}
 %define api.pure full
 
 %token NUM
@@ -23,7 +23,7 @@
 %%
 
 calclist: exp {
-    PARSERSTYPE *res = parserget_extra (scanner);
+    BASICSTYPE *res = basicget_extra (scanner);
     *res = $1;
 }
 

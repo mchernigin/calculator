@@ -14,6 +14,6 @@ EXP ([Ee][-+]?[0-9]+)
 [+\-*/()]             { return yytext[0]; }
 [0-9]+"."[0-9]*{EXP}? |
 "."?[0-9]+{EXP}?      { yylval->d = strtold (yytext, NULL); return ASTNUM; }
-.                     { printf ("Unknown character: \"%s\"", yytext); }
+.                     { printf ("ERROR: unknown character: \"%s\"", yytext); }
 
 %%

@@ -2,6 +2,7 @@ import argparse
 import random
 import subprocess
 import sys
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -49,7 +50,7 @@ def benchmark(cfg, mode, flag, sizes):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--seed', help='random seed', type=int, default=0)
-    parser.add_argument('-n', '--numcalc', help='number of calculations', type=int, default=100_000)
+    parser.add_argument('-n', '--numcalc', help='number of calculations', type=int, default=50_000)
     parser.add_argument('-m', '--min', help='minimal expression length', type=int, default=10)
     parser.add_argument('-M', '--max', help='maximum expression length', type=int, default=250)
     parser.add_argument('-o', '--output', help='output file', type=str, default='graph.png')
@@ -58,7 +59,7 @@ def main():
     sizes = [x for x in range(cfg.min, cfg.max + 1, (cfg.max - cfg.min) // 25)]
 
     random.seed(cfg.seed)
-    parser_time = benchmark(cfg, 'basic', '-p', sizes)
+    parser_time = benchmark(cfg, 'basic', '-b', sizes)
     ast_time = benchmark(cfg, 'AST', '-a', sizes)
 
     plt.plot(sizes, parser_time)

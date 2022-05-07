@@ -9,11 +9,11 @@
 #include "ast_calc.h"
 
 #define USAGE {                                                                \
-    printf ("usage: %s [-h] [-pa] [-n NUM] expression\n\n", argv[0]);          \
+    printf ("usage: %s [-h] [-ba] [-n NUM] expression\n\n", argv[0]);          \
     printf ("optional arguments:\n");                                          \
     printf ("  -h,     show this help message and exit\n");                    \
-    printf ("  -p,     use basic parser mode (default)\n");                    \
-    printf ("  -a,     use AST mode\n");                                       \
+    printf ("  -b,     use basic parser mode (default)\n");                    \
+    printf ("  -a,     use AST parser mode\n");                                \
     printf ("  -n NUM, number of calculations\n");                             \
 }
 
@@ -22,13 +22,13 @@ parse_args (config_t *config, int argc, char *argv[])
 {
     opterr = 0;     // Silence getopt error printing
     int opt;
-    while ((opt = getopt (argc, argv, "hpan:")) != -1) {
+    while ((opt = getopt (argc, argv, "hban:")) != -1) {
         switch (opt) {
         case 'h':
             USAGE;
             return (EXIT_FAILURE);
-        case 'p':
-            config->mode = MODE_PARSER;
+        case 'b':
+            config->mode = MODE_BASIC;
             break;
         case 'a':
             config->mode = MODE_AST;
@@ -67,7 +67,7 @@ main (int argc, char *argv[])
 {
     config_t config = {
         .iteration_number = 1,
-        .mode = MODE_PARSER,
+        .mode = MODE_BASIC,
     };
     if (parse_args (&config, argc, argv) != 0) {
         return (EXIT_FAILURE);
@@ -76,15 +76,14 @@ main (int argc, char *argv[])
     clock_t begin = clock ();
     int returned;
     switch (config.mode) {
-    case MODE_PARSER:
-        returned = run_parser (&config);
+    case MODE_BASIC:
+        returned = run_basic (&config);
         break;
     case MODE_AST:
         returned = run_ast (&config);
         break;
-    default:
-        fprintf (stderr, "ERROR: Unexpected calculator mode\n");
-        return (EXIT_FAILURE);
+    default: // MODE_BASIC by default and can only be switched to MODE_AST
+        __builtin_unreachable();
     }
     clock_t end = clock ();
     double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
@@ -94,7 +93,7 @@ main (int argc, char *argv[])
     }
 
     printf ("%Lg\n", config.result);
-    fprintf (stderr, "%g\n", time_spent);
+    fprintf (stderr, "%g", time_spent);
 
     return (EXIT_SUCCESS);
 }

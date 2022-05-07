@@ -1,6 +1,6 @@
 %option nounput noinput noyywrap
 %option reentrant never-interactive bison-bridge
-%option prefix="parser"
+%option prefix="basic"
 
 %{
     #include "basic_calc.h"
@@ -14,6 +14,6 @@ EXP ([Ee][-+]?[0-9]+)
 [+\-*/()]             { return yytext[0]; }
 [0-9]+"."[0-9]*{EXP}? |
 "."?[0-9]+{EXP}?      { *yylval = strtold (yytext, NULL); return NUM; }
-.                     { printf ("Unknown character: \"%s\"", yytext); }
+.                     { printf ("ERROR: unknown character: \"%s\"", yytext); }
 
 %%

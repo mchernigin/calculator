@@ -4,7 +4,7 @@
 typedef long double calc_value_t;
 
 typedef enum {
-    MODE_PARSER,
+    MODE_BASIC,
     MODE_AST,
 } calc_mode_t;
 

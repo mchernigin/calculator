@@ -1,12 +1,12 @@
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef BASIC_CALC_H
+#define BASIC_CALC_H
 
 #include "config.h"
 #include "basic_parser.h"
 
-#define PARSERSTYPE calc_value_t
-#define YYSTYPE PARSERSTYPE
+#define BASICSTYPE calc_value_t
+#define YYSTYPE BASICSTYPE
 
-int run_parser (config_t *config);
+int run_basic (config_t *config);
 
-#endif // PARSER_H
+#endif // BASIC_CALC_H
