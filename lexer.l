@@ -1,9 +1,12 @@
-%option nounput noinput noyywrap
+%option noinput nounput noyywrap
 %option reentrant never-interactive bison-bridge
-%option prefix="basic"
 
 %{
-    #include "basic_calc.h"
+    #include "config.h"
+    #include "parser.h"
+    #ifndef YY_DO_BEFORE_ACTION
+    #   include "lexer.h"
+    #endif
 %}
 
 EXP ([Ee][-+]?[0-9]+)

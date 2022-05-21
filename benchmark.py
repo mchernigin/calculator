@@ -12,21 +12,24 @@ def gen_num(boundary, use_float, precision):
         return random.randint(1, boundary)
     return max(round(random.random() * boundary, precision), 1)
 
+
 def gen_exp(numberop, boundary=10, use_float=True, precision=3):
-    exp = '('
-    parant_count = 0
-    for _ in range(numberop):
-        exp += str(gen_num(boundary, use_float, precision))
-        while parant_count > 0 and random.random() < 0.15:
-            exp += ')'
-            parant_count -= 1
-        exp += random.choice(['+', '*', '/'])
-        while random.random() < 0.1:
-            exp += '('
-            parant_count += 1
-    exp += str(gen_num(boundary, use_float, precision))
-    exp += ')' * (parant_count + 1)
+    # exp = '('
+    # parant_count = 0
+    # for _ in range(numberop):
+    #     exp += str(gen_num(boundary, use_float, precision))
+    #     while parant_count > 0 and random.random() < 0.15:
+    #         exp += ')'
+    #         parant_count -= 1
+    #     exp += random.choice(['+', '*', '/'])
+    #     while random.random() < 0.1:
+    #         exp += '('
+    #         parant_count += 1
+    # exp += str(gen_num(boundary, use_float, precision))
+    # exp += ')' * (parant_count + 1)
+    exp = '1+1*1' * (numberop // 2)
     return exp
+
 
 def draw_progress(count, total, bar_len=20):
     filled_len = round(bar_len * count / float(total))
@@ -35,17 +38,19 @@ def draw_progress(count, total, bar_len=20):
     sys.stdout.write(f'[{bar}] {percents}%\r')
     sys.stdout.flush()
 
+
 def benchmark(cfg, mode, flag, sizes):
     time = []
     for i, numberop in enumerate(sizes):
         exp = gen_exp(numberop)
-        cmd = ['./main', '-t', flag, '-n', str(cfg.numcalc), exp]
+        cmd = ['./calc', '-t', flag, '-n', str(cfg.numcalc), exp]
         result = subprocess.run(cmd, capture_output=True)
         time.append(float(result.stderr.decode().strip()))
         print(f'Running {mode} version', end='\t')
         draw_progress(i, len(sizes) - 1)
     print()
     return time
+
 
 def main():
     parser = argparse.ArgumentParser()

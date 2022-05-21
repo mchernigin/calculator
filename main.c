@@ -5,18 +5,16 @@
 
 #include "config.h"
 #include "basic_calc.h"
-#undef YYSTYPE
 #include "ast_calc.h"
 
-#define USAGE {                                                                \
-    printf ("usage: %s [-h] [-ba] [-t] [-n NUM] expression\n\n", argv[0]);     \
-    printf ("optional arguments:\n");                                          \
-    printf ("  -h,     show this help message and exit\n");                    \
-    printf ("  -b,     use basic parser mode (default)\n");                    \
-    printf ("  -a,     use AST parser mode\n");                                \
-    printf ("  -t,     print calculation time to stderr\n");                   \
-    printf ("  -n NUM, number of calculations\n");                             \
-}
+#define USAGE() \
+    printf ("usage: %s [-h] [-ba] [-t] [-n NUM] expression\n\n" \
+            "optional arguments:\n" \
+            "  -h,     show this help message and exit\n" \
+            "  -b,     use basic parser mode (default)\n" \
+            "  -a,     use AST parser mode\n" \
+            "  -t,     print calculation time to stderr\n" \
+            "  -n NUM, number of calculations\n", argv[0]);
 
 int
 parse_args (config_t *config, int argc, char *argv[])
@@ -26,7 +24,7 @@ parse_args (config_t *config, int argc, char *argv[])
     while ((opt = getopt (argc, argv, "hban:t")) != -1) {
         switch (opt) {
         case 'h':
-            USAGE;
+            USAGE ();
             return (EXIT_FAILURE);
         case 'b':
             config->mode = MODE_BASIC;
@@ -40,7 +38,7 @@ parse_args (config_t *config, int argc, char *argv[])
             config->iteration_number = strtoul (optarg, &end, 10);
             if (*end != '\0') {
                 fprintf (stderr, "ERROR: n is not an integer\n");
-                USAGE;
+                USAGE ();
                 return (EXIT_FAILURE);
             }
             break;
@@ -51,7 +49,7 @@ parse_args (config_t *config, int argc, char *argv[])
         case '?':
         default:
             fprintf (stderr, "ERROR: unexpected flag\n");
-            USAGE;
+            USAGE ();
             return (EXIT_FAILURE);
         }
     }
@@ -59,7 +57,7 @@ parse_args (config_t *config, int argc, char *argv[])
     config->expr = argv[optind];
     if (!config->expr) {
         fprintf (stderr, "ERROR: no expression was provided\n");
-        USAGE;
+        USAGE ();
         return (EXIT_FAILURE);
     }
 

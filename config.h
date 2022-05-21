@@ -3,7 +3,9 @@
 
 #include <stdbool.h>
 
-typedef long double calc_value_t;
+#ifndef calc_value_t
+#   define calc_value_t long double
+#endif
 
 typedef enum {
     MODE_BASIC,
@@ -17,5 +19,7 @@ typedef struct config_t {
     unsigned long iteration_number;
     bool print_time;
 } config_t;
+
+#define YYSTYPE calc_value_t
 
 #endif // CONFIG_H
