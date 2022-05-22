@@ -13,21 +13,24 @@ def gen_num(boundary, use_float, precision):
     return max(round(random.random() * boundary, precision), 1)
 
 
-def gen_exp(numberop, boundary=10, use_float=True, precision=3):
-    # exp = '('
-    # parant_count = 0
-    # for _ in range(numberop):
-    #     exp += str(gen_num(boundary, use_float, precision))
-    #     while parant_count > 0 and random.random() < 0.15:
-    #         exp += ')'
-    #         parant_count -= 1
-    #     exp += random.choice(['+', '*', '/'])
-    #     while random.random() < 0.1:
-    #         exp += '('
-    #         parant_count += 1
-    # exp += str(gen_num(boundary, use_float, precision))
-    # exp += ')' * (parant_count + 1)
-    exp = '1+1*1' * (numberop // 2)
+def gen_exp_easy(numberop):
+    return '1+1*1' * (numberop // 2) + ('+1' * (numberop % 2))
+
+
+def gen_exp_rand(numberop, boundary=10, use_float=True, precision=3):
+    exp = '('
+    parant_count = 0
+    for _ in range(numberop):
+        exp += str(gen_num(boundary, use_float, precision))
+        while parant_count > 0 and random.random() < 0.15:
+            exp += ')'
+            parant_count -= 1
+        exp += random.choice(['+', '*', '/'])
+        while random.random() < 0.1:
+            exp += '('
+            parant_count += 1
+    exp += str(gen_num(boundary, use_float, precision))
+    exp += ')' * (parant_count + 1)
     return exp
 
 
@@ -42,7 +45,10 @@ def draw_progress(count, total, bar_len=20):
 def benchmark(cfg, mode, flag, sizes):
     time = []
     for i, numberop in enumerate(sizes):
-        exp = gen_exp(numberop)
+        if cfg.random:
+            exp = gen_exp_rand(numberop)
+        else:
+            exp = gen_exp_easy(numberop)
         cmd = ['./calc', '-t', flag, '-n', str(cfg.numcalc), exp]
         result = subprocess.run(cmd, capture_output=True)
         time.append(float(result.stderr.decode().strip()))
@@ -54,6 +60,7 @@ def benchmark(cfg, mode, flag, sizes):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-r', '--random', help='random exressions', nargs='?', type=bool, const=True, default=False)
     parser.add_argument('-s', '--seed', help='random seed', type=int, default=0)
     parser.add_argument('-n', '--numcalc', help='number of calculations', type=int, default=50_000)
     parser.add_argument('-m', '--min', help='minimal expression length', type=int, default=10)
@@ -65,7 +72,7 @@ def main():
 
     random.seed(cfg.seed)
     parser_time = benchmark(cfg, 'basic', '-b', sizes)
-    ast_time = benchmark(cfg, 'AST', '-a', sizes)
+    ast_time = benchmark(cfg, 'ast', '-a', sizes)
 
     plt.plot(sizes, parser_time)
     plt.plot(sizes, ast_time)

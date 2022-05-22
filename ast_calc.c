@@ -4,16 +4,16 @@
 #define YYSTYPE ASTSTYPE
 
 #include "memory.h"
-ASTSTYPE
-debug(ASTSTYPE node)
+calc_value_t
+cast_to_num (ASTSTYPE node)
 { 
     calc_value_t val;
     memcpy (&val, &node, sizeof (val));
-    return node_value_create (val);
+    return (val);
 }
 
 #define EVAL(value) ASTSTYPE *res = yyget_extra (scanner); *res = value;
-#define EVAL_NUM(node)        debug (node);
+#define EVAL_NUM(node)        node_value_create (cast_to_num (node));
 #define EVAL_ADD(left, right) node_op_create (NT_PLUS, left, right)
 #define EVAL_SUB(left, right) node_op_create (NT_MINUS, left, right)
 #define EVAL_MUL(left, right) node_op_create (NT_MUL, left, right)
