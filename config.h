@@ -7,6 +7,8 @@
 #   define calc_value_t long double
 #endif
 
+#define YYSTYPE calc_value_t
+
 typedef enum {
     MODE_BASIC,
     MODE_AST,
@@ -19,7 +21,5 @@ typedef struct config_t {
     unsigned long iteration_number;
     bool print_time;
 } config_t;
-
-#define YYSTYPE calc_value_t
 
 #endif // CONFIG_H

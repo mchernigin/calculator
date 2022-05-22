@@ -4,7 +4,7 @@
 ast_node_t *
 node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)
 {
-    ast_node_t *node = malloc (sizeof (*node));
+    ast_node_t *node = (ast_node_t *) malloc (sizeof (*node));
 
     if (!node) {
         fprintf (stderr, "ERROR: cannot create a node: not enough memory\n");
@@ -21,7 +21,7 @@ node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)
 ast_node_t *
 node_value_create (calc_value_t value)
 {
-    ast_node_t *node = malloc (sizeof (*node));
+    ast_node_t *node = (ast_node_t *) malloc (sizeof (*node));
 
     if (!node) {
         fprintf (stderr, "ERROR: cannot create a node: not enough memory\n");

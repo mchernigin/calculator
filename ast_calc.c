@@ -3,13 +3,22 @@
 #define ASTSTYPE ast_node_t *
 #define YYSTYPE ASTSTYPE
 
-#define EVAL_NUM(val)         node_value_create (val->value)
+#include "memory.h"
+ASTSTYPE
+debug(ASTSTYPE node)
+{ 
+    calc_value_t val;
+    memcpy (&val, &node, sizeof (val));
+    return node_value_create (val);
+}
+
+#define EVAL(value) ASTSTYPE *res = yyget_extra (scanner); *res = value;
+#define EVAL_NUM(node)        debug (node);
 #define EVAL_ADD(left, right) node_op_create (NT_PLUS, left, right)
 #define EVAL_SUB(left, right) node_op_create (NT_MINUS, left, right)
 #define EVAL_MUL(left, right) node_op_create (NT_MUL, left, right)
 #define EVAL_DIV(left, right) node_op_create (NT_DIV, left, right)
 #define EVAL_NEG(value)       node_op_create (NT_NEG, value, NULL)
-#define EVAL(value) ASTSTYPE *res = yyget_extra (scanner); *res = value;
 
 #define yyparse ast_parse
 #include "parser.c"

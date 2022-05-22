@@ -1,13 +1,13 @@
 #define BASICSTYPE calc_value_t
 #define YYSTYPE BASICSTYPE
 
+#define EVAL(value) BASICSTYPE *res = yyget_extra (scanner); *res = value;
 #define EVAL_NUM(value)       (value)
 #define EVAL_ADD(left, right) (left + right)
 #define EVAL_SUB(left, right) (left - right)
 #define EVAL_MUL(left, right) (left * right)
 #define EVAL_DIV(left, right) (left / right)
 #define EVAL_NEG(value)       (-value)
-#define EVAL(value) BASICSTYPE *res = yyget_extra (scanner); *res = value;
 
 #define yyparse basic_parse
 #include "parser.c"
