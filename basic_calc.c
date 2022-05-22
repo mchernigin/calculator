@@ -34,5 +34,7 @@ run_basic (config_t *config)
         }
     }
 
+    yylex_destroy (scanner);
+
     return (EXIT_SUCCESS);
 }
