@@ -19,7 +19,7 @@
 int
 parse_args (config_t *config, int argc, char *argv[])
 {
-    opterr = 0;     // Silence getopt error printing
+    opterr = 0;     // Suppress getopt error printing
     int opt;
     while ((opt = getopt (argc, argv, "hban:t")) != -1) {
         switch (opt) {

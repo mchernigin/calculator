@@ -1,6 +1,4 @@
 %{
-    #include "ast.h"
-    #include "parser.h"
     #include "lexer.h"
 
     static void
@@ -20,7 +18,7 @@
 
 %%
 
-calclist: exp { EVAL($1) }
+calclist: exp { EVAL($1); }
 
 exp:
   NUM               { $$ = EVAL_NUM ($1);     }

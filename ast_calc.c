@@ -1,10 +1,7 @@
 #include "ast.h"
 
-#define ASTSTYPE ast_node_t *
-#define YYSTYPE ASTSTYPE
-
-#define EVAL(value) ASTSTYPE *res = yyget_extra (scanner); *res = value;
-#define EVAL_NUM(node)        node_value_create ((*((calc_value_t *) (&node))));
+#define EVAL(value) YYSTYPE *res = yyget_extra (scanner); *res = value;
+#define EVAL_NUM(node)        node_value_create (*((calc_value_t *) &node));
 #define EVAL_ADD(left, right) node_op_create (NT_PLUS, left, right)
 #define EVAL_SUB(left, right) node_op_create (NT_MINUS, left, right)
 #define EVAL_MUL(left, right) node_op_create (NT_MUL, left, right)

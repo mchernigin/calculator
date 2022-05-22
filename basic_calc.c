@@ -1,7 +1,8 @@
-#define BASICSTYPE calc_value_t
-#define YYSTYPE BASICSTYPE
+#include "config.h"
+#define YYSTYPE calc_value_t
+#include "parser.h"
 
-#define EVAL(value) BASICSTYPE *res = yyget_extra (scanner); *res = value;
+#define EVAL(value) YYSTYPE *res = yyget_extra (scanner); *res = value;
 #define EVAL_NUM(value)       (value)
 #define EVAL_ADD(left, right) (left + right)
 #define EVAL_SUB(left, right) (left - right)

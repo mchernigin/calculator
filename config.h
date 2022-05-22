@@ -7,8 +7,6 @@
 #   define calc_value_t long double
 #endif
 
-#define YYSTYPE calc_value_t
-
 typedef enum {
     MODE_BASIC,
     MODE_AST,
