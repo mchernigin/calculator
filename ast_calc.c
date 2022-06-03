@@ -14,30 +14,35 @@
 int
 run_ast (config_t *config)
 {
-    yyscan_t scanner = NULL;
     ast_node_t *ast = NULL;
-
+    yyscan_t scanner = NULL;
     if (yylex_init_extra (&ast, &scanner)) {
         fprintf (stderr, "ERROR: cannot initialize scanner\n");
         return (EXIT_FAILURE);
     }
 
+    int return_value = EXIT_SUCCESS;
+
     if (yy_scan_string (config->expr, scanner) == NULL) {
         fprintf (stderr, "ERROR: cannot scan given string\n");
-        return (EXIT_FAILURE);
+        return_value = EXIT_FAILURE;
+        goto free_scanner;
     }
 
     if (ast_parse (scanner)) {
         fprintf (stderr, "ERROR: cannot parse string\n");
-        return (EXIT_FAILURE);
+        return_value = EXIT_FAILURE;
+        goto free_scanner;
     }
 
     for (size_t i = 0; i < config->iteration_number; ++i) {
         config->result = ast_eval (ast);
     }
 
-    yylex_destroy (scanner);
     ast_free (ast);
 
-    return (EXIT_SUCCESS);
+free_scanner:
+    yylex_destroy (scanner);
+
+    return (return_value);
 }

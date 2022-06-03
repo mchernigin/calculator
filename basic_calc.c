@@ -17,25 +17,29 @@ int
 run_basic (config_t *config)
 {
     yyscan_t scanner = NULL;
-
     if (yylex_init_extra (&config->result, &scanner)) {
         fprintf (stderr, "ERROR: cannot initialize scanner\n");
         return (EXIT_FAILURE);
     }
 
+    int return_value = EXIT_SUCCESS;
+
     for (size_t i = 0; i < config->iteration_number; ++i) {
         if (yy_scan_string (config->expr, scanner) == NULL) {
             fprintf (stderr, "ERROR: cannot set string to parse\n");
-            return (EXIT_FAILURE);
+            return_value = EXIT_FAILURE;
+            goto free_scanner;
         }
 
         if (basic_parse (scanner)) {
             fprintf (stderr, "ERROR: cannot parse string\n");
-            return (EXIT_FAILURE);
+            return_value = EXIT_FAILURE;
+            goto free_scanner;
         }
     }
 
+free_scanner:
     yylex_destroy (scanner);
 
-    return (EXIT_SUCCESS);
+    return (return_value);
 }
