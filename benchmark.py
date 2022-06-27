@@ -12,7 +12,12 @@ def gen_num(boundary, use_float, precision):
         return random.randint(1, boundary)
     return max(round(random.random() * boundary, precision), 1)
 
-def gen_exp(numberop, boundary=10, use_float=True, precision=3):
+
+def gen_exp_easy(numberop):
+    return '1+1*1' * (numberop // 2) + ('+1' * (numberop % 2))
+
+
+def gen_exp_rand(numberop, boundary=10, use_float=True, precision=3):
     exp = '('
     parant_count = 0
     for _ in range(numberop):
@@ -28,6 +33,7 @@ def gen_exp(numberop, boundary=10, use_float=True, precision=3):
     exp += ')' * (parant_count + 1)
     return exp
 
+
 def draw_progress(count, total, bar_len=20):
     filled_len = round(bar_len * count / float(total))
     percents = int(round(100.0 * count / float(total), 1))
@@ -35,11 +41,15 @@ def draw_progress(count, total, bar_len=20):
     sys.stdout.write(f'[{bar}] {percents}%\r')
     sys.stdout.flush()
 
+
 def benchmark(cfg, mode, flag, sizes):
     time = []
     for i, numberop in enumerate(sizes):
-        exp = gen_exp(numberop)
-        cmd = ['./main', '-t', flag, '-n', str(cfg.numcalc), exp]
+        if cfg.random:
+            exp = gen_exp_rand(numberop)
+        else:
+            exp = gen_exp_easy(numberop)
+        cmd = ['./calc', '-t', flag, '-n', str(cfg.numcalc), exp]
         result = subprocess.run(cmd, capture_output=True)
         time.append(float(result.stderr.decode().strip()))
         print(f'Running {mode} version', end='\t')
@@ -47,8 +57,10 @@ def benchmark(cfg, mode, flag, sizes):
     print()
     return time
 
+
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-r', '--random', help='random exressions', nargs='?', type=bool, const=True, default=False)
     parser.add_argument('-s', '--seed', help='random seed', type=int, default=0)
     parser.add_argument('-n', '--numcalc', help='number of calculations', type=int, default=50_000)
     parser.add_argument('-m', '--min', help='minimal expression length', type=int, default=10)
@@ -60,7 +72,7 @@ def main():
 
     random.seed(cfg.seed)
     parser_time = benchmark(cfg, 'basic', '-b', sizes)
-    ast_time = benchmark(cfg, 'AST', '-a', sizes)
+    ast_time = benchmark(cfg, 'ast', '-a', sizes)
 
     plt.plot(sizes, parser_time)
     plt.plot(sizes, ast_time)

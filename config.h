@@ -3,7 +3,9 @@
 
 #include <stdbool.h>
 
-typedef long double calc_value_t;
+#ifndef calc_value_t
+#   define calc_value_t long double
+#endif
 
 typedef enum {
     MODE_BASIC,

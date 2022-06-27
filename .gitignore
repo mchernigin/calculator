@@ -6,6 +6,7 @@ journal/
 *parser.[ch]
 *lexer.[ch]
 main
+calc
 main.dSYM
 
 __pycache__
