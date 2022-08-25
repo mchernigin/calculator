@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #ifndef calc_value_t
-#   define calc_value_t long double
+#   define calc_value_t double
 #endif
 
 typedef enum {
