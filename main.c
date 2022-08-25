@@ -97,7 +97,7 @@ main (int argc, char *argv[])
     clock_t end = clock ();
     double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
 
-    printf ("%Lg\n", config.result);
+    printf ("%g\n", config.result);
     if (config.print_time) {
         fprintf (stderr, "%g", time_spent);
     }

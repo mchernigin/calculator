@@ -1,6 +1,4 @@
-.DS_store
-.vscode/
-journal/
+.*
 
 *.o
 *parser.[ch]
@@ -10,7 +8,5 @@ calc
 main.dSYM
 
 __pycache__
-.ipynb_checkpoints
-venv
 
 graph.png

@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra -ggdb3
 LEX = flex
 YACC = bison
 
-.PHONY: all clean
+.PHONY: all benchmark clean
 
 all: main
 	mv main calc
@@ -18,5 +18,8 @@ main: main.o ast.o basic_calc.o ast_calc.o lexer.o
 main.c: lexer.h basic_calc.h ast_calc.h
 basic_calc.c ast_calc.c: parser.h
 
+benchmark: all
+	python benchmark.py
+
 clean:
-	$(RM) *.o lexer.[ch] parser.[ch] main calc
+	$(RM) *.o lexer.[ch] parser.[ch] main calc graph.png
