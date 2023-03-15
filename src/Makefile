@@ -1,9 +1,9 @@
 CC = cc
-CFLAGS = -Wall -Wextra -ggdb3
+CFLAGS = -Wall -ggdb3
 LEX = flex
 YACC = bison
 
-.PHONY: all benchmark clean
+.PHONY: all clean
 
 all: main
 	mv main calc
@@ -17,9 +17,6 @@ parser.h parser.c: parser.y
 main: main.o ast.o basic_calc.o ast_calc.o lexer.o
 main.c: lexer.h basic_calc.h ast_calc.h
 basic_calc.c ast_calc.c: parser.h
-
-benchmark: all
-	python benchmark.py
 
 clean:
 	$(RM) *.o lexer.[ch] parser.[ch] main calc graph.png

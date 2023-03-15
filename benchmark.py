@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
+BIN = './src/calc'
+
+
 def gen_num(boundary, use_float, precision):
     if not use_float:
         return random.randint(1, boundary)
@@ -49,7 +52,7 @@ def benchmark(cfg, mode, flag, sizes):
             exp = gen_exp_rand(numberop)
         else:
             exp = gen_exp_easy(numberop)
-        cmd = ['./calc', '-t', flag, '-n', str(cfg.numcalc), exp]
+        cmd = [BIN, '-t', flag, '-n', str(cfg.numcalc), exp]
         result = subprocess.run(cmd, capture_output=True)
         time.append(float(result.stderr.decode().strip()))
         print(f'Running {mode} version', end='\t')

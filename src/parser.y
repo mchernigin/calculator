@@ -2,7 +2,7 @@
     #include "lexer.h"
 
     static void
-    yyerror (__attribute__ ((unused)) yyscan_t scanner, const char *msg)
+    yyerror (yyscan_t scanner, const char *msg)
     {
         fprintf (stderr, "ERROR: %s\n", msg);
     }
