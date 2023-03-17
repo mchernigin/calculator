@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include "config.h"
+#include "abstract_calc.h"
 #include "basic_calc.h"
 #include "ast_calc.h"
 
@@ -76,23 +77,39 @@ main (int argc, char *argv[])
         return (EXIT_FAILURE);
     }
 
+    abstract_calc_t calc = {
+        .scanner = NULL,
+        .ast = NULL,
+    };
+
     clock_t begin = clock ();
 
-    int returned;
     switch (config.mode) {
     case MODE_BASIC:
-        returned = run_basic (&config);
+        calc.init = &init_basic_calc;
+        calc.run = &run_basic_calc;
+        calc.destroy = &destroy_basic_calc;
         break;
     case MODE_AST:
-        returned = run_ast (&config);
+        calc.init = &init_ast_calc;
+        calc.run = &run_ast_calc;
+        calc.destroy = &destroy_ast_calc;
         break;
     default: // MODE_BASIC by default and can only be switched to MODE_AST
         __builtin_unreachable ();
     }
 
-    if (returned != 0) {
+    if (calc.init (&config, &calc) != 0) {
+        fprintf (stderr, "ERROR: cannot initialize calculator\n");
         return (EXIT_FAILURE);
     }
+    for (size_t i = 0; i < config.iteration_number; ++i) {
+        if (calc.run (&config, &calc) != 0) {
+            fprintf (stderr, "ERROR: cannot run calculator\n");
+            return (EXIT_FAILURE);
+        }
+    }
+    calc.destroy (&calc);
 
     clock_t end = clock ();
     double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;

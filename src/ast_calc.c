@@ -1,3 +1,4 @@
+#include "ast_calc.h"
 #include "ast.h"
 
 #define EVAL(value) YYSTYPE *res = yyget_extra (scanner); *res = value;
@@ -12,37 +13,39 @@
 #include "parser.c"
 
 int
-run_ast (config_t *config)
+init_ast_calc (config_t *config, abstract_calc_t *calc)
 {
-    ast_node_t *ast = NULL;
-    yyscan_t scanner = NULL;
-    if (yylex_init_extra (&ast, &scanner)) {
+    if (yylex_init_extra (&calc->ast, &calc->scanner)) {
         fprintf (stderr, "ERROR: cannot initialize scanner\n");
         return (EXIT_FAILURE);
     }
 
-    int return_value = EXIT_SUCCESS;
-
-    if (yy_scan_string (config->expr, scanner) == NULL) {
+    if (yy_scan_string (config->expr, calc->scanner) == NULL) {
         fprintf (stderr, "ERROR: cannot scan given string\n");
-        return_value = EXIT_FAILURE;
-        goto free_scanner;
+        return (EXIT_FAILURE);
     }
 
-    if (ast_parse (scanner)) {
+    if (ast_parse (calc->scanner)) {
         fprintf (stderr, "ERROR: cannot parse string\n");
-        return_value = EXIT_FAILURE;
-        goto free_scanner;
+        return (EXIT_FAILURE);
     }
 
-    for (size_t i = 0; i < config->iteration_number; ++i) {
-        config->result = ast_eval (ast);
+    return (EXIT_SUCCESS);
+}
+
+int
+run_ast_calc (config_t *config, abstract_calc_t *calc)
+{
+    config->result = ast_eval (calc->ast);
+
+    return (EXIT_SUCCESS);
+}
+
+void
+destroy_ast_calc (abstract_calc_t *calc)
+{
+    if (calc->ast) {
+        ast_free (calc->ast);
     }
-
-    ast_free (ast);
-
-free_scanner:
-    yylex_destroy (scanner);
-
-    return (return_value);
+    yylex_destroy (calc->scanner);
 }
