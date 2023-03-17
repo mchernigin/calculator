@@ -38,7 +38,7 @@ parse_args (config_t *config, int argc, char *argv[])
             char *end;
             config->iteration_number = strtoul (optarg, &end, 10);
             if (*end != '\0') {
-                fprintf (stderr, "ERROR: n is not an integer\n");
+                fprintf (stderr, "error: n is not an integer\n");
                 USAGE ();
                 return (EXIT_FAILURE);
             }
@@ -49,7 +49,7 @@ parse_args (config_t *config, int argc, char *argv[])
             break;
         case '?':
         default:
-            fprintf (stderr, "ERROR: unexpected flag\n");
+            fprintf (stderr, "error: unexpected flag\n");
             USAGE ();
             return (EXIT_FAILURE);
         }
@@ -57,7 +57,7 @@ parse_args (config_t *config, int argc, char *argv[])
 
     config->expr = argv[optind];
     if (!config->expr) {
-        fprintf (stderr, "ERROR: no expression was provided\n");
+        fprintf (stderr, "error: no expression was provided\n");
         USAGE ();
         return (EXIT_FAILURE);
     }
@@ -77,12 +77,7 @@ main (int argc, char *argv[])
         return (EXIT_FAILURE);
     }
 
-    abstract_calc_t calc = {
-        .scanner = NULL,
-        .ast = NULL,
-    };
-
-    clock_t begin = clock ();
+    abstract_calc_t calc;
 
     switch (config.mode) {
     case MODE_BASIC:
@@ -99,17 +94,21 @@ main (int argc, char *argv[])
         __builtin_unreachable ();
     }
 
+    int exit_code = EXIT_SUCCESS;
+
     if (calc.init (&config, &calc) != 0) {
-        fprintf (stderr, "ERROR: cannot initialize calculator\n");
-        return (EXIT_FAILURE);
+        exit_code = EXIT_FAILURE;
+        goto exit;
     }
+
+    clock_t begin = clock ();
+
     for (size_t i = 0; i < config.iteration_number; ++i) {
         if (calc.run (&config, &calc) != 0) {
-            fprintf (stderr, "ERROR: cannot run calculator\n");
-            return (EXIT_FAILURE);
+            exit_code = EXIT_FAILURE;
+            goto exit;
         }
     }
-    calc.destroy (&calc);
 
     clock_t end = clock ();
     double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
@@ -119,5 +118,8 @@ main (int argc, char *argv[])
         fprintf (stderr, "%g", time_spent);
     }
 
-    return (EXIT_SUCCESS);
+exit:
+    calc.destroy (&calc);
+
+    return (exit_code);
 }

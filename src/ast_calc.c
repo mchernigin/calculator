@@ -16,17 +16,17 @@ int
 init_ast_calc (config_t *config, abstract_calc_t *calc)
 {
     if (yylex_init_extra (&calc->ast, &calc->scanner)) {
-        fprintf (stderr, "ERROR: cannot initialize scanner\n");
+        fprintf (stderr, "error: cannot initialize scanner\n");
         return (EXIT_FAILURE);
     }
 
     if (yy_scan_string (config->expr, calc->scanner) == NULL) {
-        fprintf (stderr, "ERROR: cannot scan given string\n");
+        fprintf (stderr, "error: cannot scan given string\n");
         return (EXIT_FAILURE);
     }
 
     if (ast_parse (calc->scanner)) {
-        fprintf (stderr, "ERROR: cannot parse string\n");
+        fprintf (stderr, "error: cannot parse string\n");
         return (EXIT_FAILURE);
     }
 
@@ -47,5 +47,7 @@ destroy_ast_calc (abstract_calc_t *calc)
     if (calc->ast) {
         ast_free (calc->ast);
     }
-    yylex_destroy (calc->scanner);
+    if (calc->scanner) {
+        yylex_destroy (calc->scanner);
+    }
 }

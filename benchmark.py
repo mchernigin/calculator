@@ -40,7 +40,7 @@ def gen_exp_rand(numberop, boundary=10, use_float=True, precision=3):
 def draw_progress(count, total, bar_len=20):
     filled_len = round(bar_len * count / float(total))
     percents = int(round(100.0 * count / float(total), 1))
-    bar = '=' * filled_len + ' ' * (bar_len - filled_len)
+    bar = '#' * filled_len + '.' * (bar_len - filled_len)
     sys.stdout.write(f'[{bar}] {percents}%\r')
     sys.stdout.flush()
 
@@ -84,6 +84,8 @@ def main():
     ax.set_xlabel('Number of operators')
     ax.set_ylabel('Time')
     plt.legend(labels=["Basic parser", "AST parser"])
+
+    plt.yscale('log')
 
     ax.grid(visible=True, color='#DDDDDD')
     plt.savefig(cfg.output, dpi=600)

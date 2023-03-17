@@ -5,7 +5,7 @@
     yyerror (yyscan_t scanner, const char *msg)
     {
         (void) scanner; // Suppress warning of unused scanner
-        fprintf (stderr, "ERROR: %s\n", msg);
+        fprintf (stderr, "error: %s\n", msg);
     }
 %}
 
