@@ -15,8 +15,8 @@ parser.h parser.c: parser.y
 	$(YACC) -Wall -o parser.c -d $<
 
 main: main.o ast.o basic_calc.o ast_calc.o lexer.o
-main.c: lexer.h basic_calc.h ast_calc.h
-basic_calc.c ast_calc.c: parser.h
+main.o: lexer.h basic_calc.h ast_calc.h
+basic_calc.o ast_calc.o: parser.h
 
 clean:
 	$(RM) *.o lexer.[ch] parser.[ch] main calc graph.png

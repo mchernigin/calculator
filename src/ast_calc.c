@@ -12,31 +12,43 @@
 #define yyparse ast_parse
 #include "parser.c"
 
-int
-init_ast_calc (config_t *config, abstract_calc_t *calc)
+abstract_calc_t *
+init_ast_calc (config_t *config)
 {
-    if (yylex_init_extra (&calc->ast, &calc->scanner)) {
-        fprintf (stderr, "error: cannot initialize scanner\n");
-        return (EXIT_FAILURE);
+    ast_calc_t *calc = (ast_calc_t *) malloc (sizeof (*calc));
+    yyscan_t scanner = NULL;
+
+    calc->base.expr = config->expr;
+    calc->base.run = run_ast_calc;
+    calc->base.destroy = destroy_ast_calc;
+
+    if (yylex_init_extra (&calc->ast, &scanner)) {
+        fprintf (stderr, "error: cannot initialize scanner: %s\n",
+                 strerror (errno));
+        return (NULL);
     }
 
-    if (yy_scan_string (config->expr, calc->scanner) == NULL) {
+    if (yy_scan_string (calc->base.expr, scanner) == NULL) {
         fprintf (stderr, "error: cannot scan given string\n");
-        return (EXIT_FAILURE);
+        return (NULL);
     }
 
-    if (ast_parse (calc->scanner)) {
+    if (ast_parse (scanner)) {
         fprintf (stderr, "error: cannot parse string\n");
-        return (EXIT_FAILURE);
+        return (NULL);
     }
 
-    return (EXIT_SUCCESS);
+    yylex_destroy (scanner);
+
+    return ((abstract_calc_t *) calc);
 }
 
 int
-run_ast_calc (config_t *config, abstract_calc_t *calc)
+run_ast_calc (abstract_calc_t *calc)
 {
-    config->result = ast_eval (calc->ast);
+    ast_calc_t *ast_calc = (ast_calc_t *) calc;
+
+    ast_calc->base.result = ast_eval (ast_calc->ast);
 
     return (EXIT_SUCCESS);
 }
@@ -44,10 +56,11 @@ run_ast_calc (config_t *config, abstract_calc_t *calc)
 void
 destroy_ast_calc (abstract_calc_t *calc)
 {
-    if (calc->ast) {
-        ast_free (calc->ast);
+    ast_calc_t *ast_calc = (ast_calc_t *) calc;
+
+    if (ast_calc->ast) {
+        ast_free (ast_calc->ast);
     }
-    if (calc->scanner) {
-        yylex_destroy (calc->scanner);
-    }
+
+    free (ast_calc);
 }

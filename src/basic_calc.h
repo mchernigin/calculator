@@ -4,8 +4,13 @@
 #include "abstract_calc.h"
 #include "config.h"
 
-int init_basic_calc (config_t *config, abstract_calc_t *calc);
-int run_basic_calc (config_t *config, abstract_calc_t *calc);
+typedef struct basic_calc_t {
+    abstract_calc_t base;
+    yyscan_t scanner;
+} basic_calc_t ;
+
+abstract_calc_t *init_basic_calc (config_t *config);
+int run_basic_calc (abstract_calc_t *calc);
 void destroy_basic_calc (abstract_calc_t *calc);
 
 #endif // BASIC_CALC_H

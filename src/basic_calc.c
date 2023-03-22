@@ -14,26 +14,34 @@
 #define yyparse basic_parse
 #include "parser.c"
 
-int
-init_basic_calc (config_t *config, abstract_calc_t *calc)
+abstract_calc_t *
+init_basic_calc (config_t *config)
 {
-    if (yylex_init_extra (&config->result, &calc->scanner)) {
+    basic_calc_t *calc = (basic_calc_t *) malloc (sizeof (*calc));
+
+    calc->base.expr = config->expr;
+    calc->base.run = run_basic_calc;
+    calc->base.destroy = destroy_basic_calc;
+
+    if (yylex_init_extra (&calc->base.result, &calc->scanner)) {
         fprintf (stderr, "error: cannot initialize scanner\n");
-        return (EXIT_FAILURE);
+        return (NULL);
     }
 
-    return (EXIT_SUCCESS);
+    return ((abstract_calc_t *) calc);
 }
 
 int
-run_basic_calc (config_t *config, abstract_calc_t *calc)
+run_basic_calc (abstract_calc_t *calc)
 {
-    if (yy_scan_string (config->expr, calc->scanner) == NULL) {
+    basic_calc_t *basic_calc = (basic_calc_t *) calc;
+
+    if (yy_scan_string (basic_calc->base.expr, basic_calc->scanner) == NULL) {
         fprintf (stderr, "error: cannot set string to parse\n");
         return (EXIT_FAILURE);
     }
 
-    if (basic_parse (calc->scanner)) {
+    if (basic_parse (basic_calc->scanner)) {
         fprintf (stderr, "error: cannot parse string\n");
         return (EXIT_FAILURE);
     }
@@ -44,7 +52,11 @@ run_basic_calc (config_t *config, abstract_calc_t *calc)
 void
 destroy_basic_calc (abstract_calc_t *calc)
 {
-    if (calc->scanner) {
-        yylex_destroy (calc->scanner);
+    basic_calc_t *basic_calc = (basic_calc_t *) calc;
+
+    if (basic_calc->scanner) {
+        yylex_destroy (basic_calc->scanner);
     }
+
+    free (basic_calc);
 }

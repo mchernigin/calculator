@@ -77,18 +77,14 @@ main (int argc, char *argv[])
         return (EXIT_FAILURE);
     }
 
-    abstract_calc_t calc;
+    abstract_calc_t *calc;
 
     switch (config.mode) {
     case MODE_BASIC:
-        calc.init = &init_basic_calc;
-        calc.run = &run_basic_calc;
-        calc.destroy = &destroy_basic_calc;
+        calc = init_basic_calc (&config);
         break;
     case MODE_AST:
-        calc.init = &init_ast_calc;
-        calc.run = &run_ast_calc;
-        calc.destroy = &destroy_ast_calc;
+        calc = init_ast_calc (&config);
         break;
     default: // MODE_BASIC by default and can only be switched to MODE_AST
         __builtin_unreachable ();
@@ -96,7 +92,7 @@ main (int argc, char *argv[])
 
     int exit_code = EXIT_SUCCESS;
 
-    if (calc.init (&config, &calc) != 0) {
+    if (!calc) {
         exit_code = EXIT_FAILURE;
         goto exit;
     }
@@ -104,7 +100,7 @@ main (int argc, char *argv[])
     clock_t begin = clock ();
 
     for (size_t i = 0; i < config.iteration_number; ++i) {
-        if (calc.run (&config, &calc) != 0) {
+        if (calc->run (calc) != 0) {
             exit_code = EXIT_FAILURE;
             goto exit;
         }
@@ -113,13 +109,14 @@ main (int argc, char *argv[])
     clock_t end = clock ();
     double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
 
-    printf ("%g\n", config.result);
+    printf ("%g\n", calc->result);
     if (config.print_time) {
         fprintf (stderr, "%g", time_spent);
     }
 
 exit:
-    calc.destroy (&calc);
+    calc->destroy (calc);
 
     return (exit_code);
 }
+
