@@ -12,44 +12,11 @@
 #define yyparse ast_parse
 #include "parser.c"
 
-abstract_calc_t *
-init_ast_calc (config_t *config)
-{
-    ast_calc_t *calc = (ast_calc_t *) malloc (sizeof (*calc));
-    yyscan_t scanner = NULL;
-
-    calc->base.expr = config->expr;
-    calc->base.run = run_ast_calc;
-    calc->base.destroy = destroy_ast_calc;
-
-    if (yylex_init_extra (&calc->ast, &scanner)) {
-        fprintf (stderr, "error: cannot initialize scanner: %s\n",
-                 strerror (errno));
-        return (NULL);
-    }
-
-    if (yy_scan_string (calc->base.expr, scanner) == NULL) {
-        fprintf (stderr, "error: cannot scan given string\n");
-        return (NULL);
-    }
-
-    if (ast_parse (scanner)) {
-        fprintf (stderr, "error: cannot parse string\n");
-        return (NULL);
-    }
-
-    yylex_destroy (scanner);
-
-    return ((abstract_calc_t *) calc);
-}
-
 int
 run_ast_calc (abstract_calc_t *calc)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
-
     ast_calc->base.result = ast_eval (ast_calc->ast);
-
     return (EXIT_SUCCESS);
 }
 
@@ -57,10 +24,51 @@ void
 destroy_ast_calc (abstract_calc_t *calc)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
-
-    if (ast_calc->ast) {
-        ast_free (ast_calc->ast);
-    }
-
+    ast_free (ast_calc->ast);
     free (ast_calc);
 }
+
+abstract_calc_t *
+init_ast_calc (char *expr)
+{
+    ast_calc_t *calc = (ast_calc_t *) malloc (sizeof (*calc));
+
+    if (NULL == calc) {
+        perror ("error: cannot create calculator");
+        return (NULL);
+    }
+
+    yyscan_t scanner = NULL;
+
+    if (0 != yylex_init_extra (&calc->ast, &scanner)) {
+        perror ("error: cannot initialize scanner");
+        goto fail_free_calc;
+    }
+
+    if (NULL == yy_scan_string (calc->base.expr, scanner)) {
+        perror ("error: cannot scan given string");
+        goto fail_free_scanner;
+    }
+
+    if (0 != ast_parse (scanner)) {
+        fprintf (stderr, "error: cannot parse string\n");
+        goto fail_free_scanner;
+    }
+
+    calc->base.expr = expr;
+    calc->base.run = run_ast_calc;
+    calc->base.destroy = destroy_ast_calc;
+
+    yylex_destroy (scanner);
+
+    return (&calc->base);
+
+fail_free_scanner:
+    yylex_destroy (scanner);
+
+fail_free_calc:
+    free (calc);
+
+    return (NULL);
+}
+

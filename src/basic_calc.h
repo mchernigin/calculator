@@ -2,15 +2,12 @@
 #define BASIC_CALC_H
 
 #include "abstract_calc.h"
-#include "config.h"
 
 typedef struct basic_calc_t {
     abstract_calc_t base;
     yyscan_t scanner;
 } basic_calc_t ;
 
-abstract_calc_t *init_basic_calc (config_t *config);
-int run_basic_calc (abstract_calc_t *calc);
-void destroy_basic_calc (abstract_calc_t *calc);
+abstract_calc_t *init_basic_calc (char *expr);
 
 #endif // BASIC_CALC_H

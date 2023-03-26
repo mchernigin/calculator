@@ -6,7 +6,7 @@ node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)
 {
     ast_node_t *node = (ast_node_t *) malloc (sizeof (*node));
 
-    if (!node) {
+    if (NULL == node) {
         fprintf (stderr, "error: cannot create a node: not enough memory\n");
         return (NULL);
     }
@@ -23,7 +23,7 @@ node_value_create (calc_value_t value)
 {
     ast_node_t *node = (ast_node_t *) malloc (sizeof (*node));
 
-    if (!node) {
+    if (NULL == node) {
         fprintf (stderr, "error: cannot create a node: not enough memory\n");
         return (NULL);
     }
@@ -58,8 +58,10 @@ ast_free (ast_node_t *ast)
     case NT_MUL:
     case NT_DIV:
         ast_free (ast->right);
+        __attribute__ ((fallthrough));
     case NT_NEG:
         ast_free (ast->left);
+        __attribute__ ((fallthrough));
     case NT_NUM:
         free (ast);
         break;
@@ -67,3 +69,4 @@ ast_free (ast_node_t *ast)
         __builtin_unreachable ();
     }
 }
+

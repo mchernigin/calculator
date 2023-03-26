@@ -19,7 +19,10 @@
 
 %%
 
-calclist: exp { EVAL($1); }
+calclist: exp {
+    (void) yynerrs; // Suppress warning of unused variable
+    EVAL ($1);
+}
 
 exp:
   NUM               { $$ = EVAL_NUM ($1);     }
