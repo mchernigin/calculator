@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
+BIN = './src/calc'
+
+
 def gen_num(boundary, use_float, precision):
     if not use_float:
         return random.randint(1, boundary)
@@ -37,7 +40,7 @@ def gen_exp_rand(numberop, boundary=10, use_float=True, precision=3):
 def draw_progress(count, total, bar_len=20):
     filled_len = round(bar_len * count / float(total))
     percents = int(round(100.0 * count / float(total), 1))
-    bar = '=' * filled_len + ' ' * (bar_len - filled_len)
+    bar = '#' * filled_len + '.' * (bar_len - filled_len)
     sys.stdout.write(f'[{bar}] {percents}%\r')
     sys.stdout.flush()
 
@@ -49,7 +52,7 @@ def benchmark(cfg, mode, flag, sizes):
             exp = gen_exp_rand(numberop)
         else:
             exp = gen_exp_easy(numberop)
-        cmd = ['./calc', '-t', flag, '-n', str(cfg.numcalc), exp]
+        cmd = [BIN, '-t', flag, '-n', str(cfg.numcalc), exp]
         result = subprocess.run(cmd, capture_output=True)
         time.append(float(result.stderr.decode().strip()))
         print(f'Running {mode} version', end='\t')
@@ -81,6 +84,8 @@ def main():
     ax.set_xlabel('Number of operators')
     ax.set_ylabel('Time')
     plt.legend(labels=["Basic parser", "AST parser"])
+
+    plt.yscale('log')
 
     ax.grid(visible=True, color='#DDDDDD')
     plt.savefig(cfg.output, dpi=600)

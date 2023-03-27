@@ -14,7 +14,6 @@ typedef enum {
 
 typedef struct config_t {
     char *expr;
-    calc_value_t result;
     calc_mode_t mode;
     unsigned long iteration_number;
     bool print_time;

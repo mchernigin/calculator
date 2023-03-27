@@ -2,9 +2,10 @@
     #include "lexer.h"
 
     static void
-    yyerror (__attribute__ ((unused)) yyscan_t scanner, const char *msg)
+    yyerror (yyscan_t scanner, const char *msg)
     {
-        fprintf (stderr, "ERROR: %s\n", msg);
+        (void) scanner; // Suppress warning of unused scanner
+        fprintf (stderr, "error: %s\n", msg);
     }
 %}
 
@@ -18,7 +19,10 @@
 
 %%
 
-calclist: exp { EVAL($1); }
+calclist: exp {
+    (void) yynerrs; // Suppress warning of unused variable
+    EVAL ($1);
+}
 
 exp:
   NUM               { $$ = EVAL_NUM ($1);     }

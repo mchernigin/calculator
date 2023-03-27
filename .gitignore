@@ -1,4 +1,5 @@
 .*
+!.gitignore
 
 *.o
 *parser.[ch]
@@ -8,5 +9,7 @@ calc
 main.dSYM
 
 __pycache__
+pyrightconfig.json
+Pipfile.lock
 
 graph.png

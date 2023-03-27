@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include "config.h"
+#include "abstract_calc.h"
 #include "basic_calc.h"
 #include "ast_calc.h"
 
@@ -21,7 +22,7 @@ parse_args (config_t *config, int argc, char *argv[])
 {
     opterr = 0;     // Suppress getopt error printing
     int opt;
-    while ((opt = getopt (argc, argv, "hban:t")) != -1) {
+    while (-1 != (opt = getopt (argc, argv, "hban:t"))) {
         switch (opt) {
         case 'h':
             USAGE ();
@@ -36,8 +37,8 @@ parse_args (config_t *config, int argc, char *argv[])
         {
             char *end;
             config->iteration_number = strtoul (optarg, &end, 10);
-            if (*end != '\0') {
-                fprintf (stderr, "ERROR: n is not an integer\n");
+            if ('\0' != *end) {
+                fprintf (stderr, "error: n is not an integer\n");
                 USAGE ();
                 return (EXIT_FAILURE);
             }
@@ -48,15 +49,15 @@ parse_args (config_t *config, int argc, char *argv[])
             break;
         case '?':
         default:
-            fprintf (stderr, "ERROR: unexpected flag\n");
+            fprintf (stderr, "error: unexpected flag\n");
             USAGE ();
             return (EXIT_FAILURE);
         }
     }
 
     config->expr = argv[optind];
-    if (!config->expr) {
-        fprintf (stderr, "ERROR: no expression was provided\n");
+    if (NULL == config->expr) {
+        fprintf (stderr, "error: no expression was provided\n");
         USAGE ();
         return (EXIT_FAILURE);
     }
@@ -72,35 +73,49 @@ main (int argc, char *argv[])
         .mode = MODE_BASIC,
         .print_time = false,
     };
-    if (parse_args (&config, argc, argv) != 0) {
+    if (0 != parse_args (&config, argc, argv)) {
         return (EXIT_FAILURE);
     }
 
-    clock_t begin = clock ();
+    abstract_calc_t *calc;
 
-    int returned;
     switch (config.mode) {
     case MODE_BASIC:
-        returned = run_basic (&config);
+        calc = init_basic_calc (config.expr);
         break;
     case MODE_AST:
-        returned = run_ast (&config);
+        calc = init_ast_calc (config.expr);
         break;
     default: // MODE_BASIC by default and can only be switched to MODE_AST
         __builtin_unreachable ();
     }
 
-    if (returned != 0) {
+    if (NULL == calc) {
         return (EXIT_FAILURE);
+    }
+
+    int exit_code = EXIT_SUCCESS;
+
+    clock_t begin = clock ();
+
+    for (size_t i = 0; i < config.iteration_number; ++i) {
+        if (0 != run_calc (calc)) {
+            exit_code = EXIT_FAILURE;
+            goto destroy_calc;
+        }
     }
 
     clock_t end = clock ();
     double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
 
-    printf ("%g\n", config.result);
+    printf ("%g\n", calc->result);
     if (config.print_time) {
-        fprintf (stderr, "%g", time_spent);
+        fprintf (stderr, "%lf", time_spent);
     }
 
-    return (EXIT_SUCCESS);
+destroy_calc:
+    destroy_calc (calc);
+
+    return (exit_code);
 }
+
