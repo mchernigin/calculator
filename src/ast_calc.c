@@ -45,7 +45,7 @@ init_ast_calc (char *expr)
         goto fail_free_calc;
     }
 
-    if (NULL == yy_scan_string (calc->base.expr, scanner)) {
+    if (NULL == yy_scan_string (expr, scanner)) {
         perror ("error: cannot scan given string");
         goto fail_free_scanner;
     }
