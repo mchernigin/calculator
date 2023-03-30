@@ -1,7 +1,10 @@
 #ifndef AST_H
 #define AST_H
 
+#include <stdlib.h>
 #include "config.h"
+
+#define YYSTYPE ast_node_t *
 
 typedef enum {
     NT_NUM,
@@ -23,10 +26,15 @@ typedef struct ast_node_t {
     };
 } ast_node_t;
 
-#define YYSTYPE ast_node_t *
+typedef struct arena_node_t {
+    ast_node_t *ast;
+    size_t capacity;
+    size_t allocated;
+} arena_node_t;
 
-ast_node_t *node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right);
 ast_node_t *node_value_create (calc_value_t value);
+ast_node_t *node_op_create (node_type_t node_type, ast_node_t *left,
+                            ast_node_t *right);
 ast_node_t *node_op_create (node_type_t node_type, ast_node_t *left,
                             ast_node_t *right);
 calc_value_t ast_eval (ast_node_t *ast);

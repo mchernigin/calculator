@@ -1,6 +1,60 @@
 #include "ast.h"
 #include "lexer.h"
 
+#define ARENA_INIT_CAPACITY 16
+#define ARENA_CAPACITY_GROWTH 2
+
+arena_node_t *
+arena_init (void)
+{
+    arena_node_t *arena = malloc (sizeof (*arena));
+
+    arena->capacity = ARENA_INIT_CAPACITY;
+    arena->allocated = 0;
+    arena->ast = malloc (arena->capacity * sizeof (*arena->ast));
+
+    if (NULL == arena->ast) {
+        perror ("error: cannot initialize areana");
+        return (NULL);
+    }
+
+    return (arena);
+}
+
+void
+arena_destroy (arena_node_t *arena)
+{
+    if (NULL != arena->ast) {
+        free (arena->ast);
+    }
+
+    free (arena);
+}
+
+int
+arena_allocate (arena_node_t *arena, size_t alloc_size)
+{
+    size_t new_alloc_size = arena->allocated + alloc_size;
+
+    if (new_alloc_size > arena->capacity) {
+        size_t new_capacity = ARENA_CAPACITY_GROWTH * arena->capacity;
+        ast_node_t *new_asts =
+            realloc (arena->ast, new_capacity * sizeof (*arena->ast));
+
+        if (NULL == arena->ast) {
+            perror ("error: cannot reallocate areana");
+            return (-1);
+        }
+
+        arena->ast = new_asts;
+        arena->capacity = new_capacity;
+    }
+
+    int idx = arena->allocated;
+    arena->allocated = new_alloc_size;
+    return (idx);
+}
+
 ast_node_t *
 node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)
 {
