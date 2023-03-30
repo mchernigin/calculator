@@ -1,6 +1,4 @@
 #include "basic_calc.h"
-#undef YYSTYPE
-#define YYSTYPE calc_value_t
 #include "parser.h"
 
 #define EVAL(value) YYSTYPE *res = yyget_extra (scanner); *res = value;
@@ -11,8 +9,14 @@
 #define EVAL_DIV(left, right) (left / right)
 #define EVAL_NEG(value)       (-value)
 
+#define YYSTYPE calc_value_t
 #define yyparse basic_parse
 #include "parser.c"
+
+typedef struct basic_calc_t {
+    abstract_calc_t base;
+    yyscan_t scanner;
+} basic_calc_t ;
 
 int
 run_basic_calc (abstract_calc_t *calc)

@@ -1,9 +1,8 @@
 #ifndef ABSTRACT_CALC_H
 #define ABSTRACT_CALC_H
 
-#include "ast.h"
+#include <stdlib.h>
 #include "config.h"
-#include "lexer.h"
 
 typedef struct abstract_calc_t {
     char *expr;

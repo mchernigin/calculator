@@ -9,8 +9,14 @@
 #define EVAL_DIV(left, right) node_op_create (NT_DIV, left, right)
 #define EVAL_NEG(value)       node_op_create (NT_NEG, value, NULL)
 
+#define YYSTYPE ast_node_t *
 #define yyparse ast_parse
 #include "parser.c"
+
+typedef struct ast_calc_t {
+  abstract_calc_t base;
+  ast_node_t *ast;
+} ast_calc_t;
 
 int
 run_ast_calc (abstract_calc_t *calc)

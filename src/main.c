@@ -8,13 +8,13 @@
 #include "basic_calc.h"
 #include "ast_calc.h"
 
-#define USAGE() \
-    printf ("usage: %s [-h] [-ba] [-t] [-n NUM] expression\n\n" \
-            "optional arguments:\n" \
-            "  -h,     show this help message and exit\n" \
-            "  -b,     use basic parser mode (default)\n" \
-            "  -a,     use AST parser mode\n" \
-            "  -t,     print calculation time to stderr\n" \
+#define USAGE()                                                                \
+    printf ("usage: %s [-h] [-ba] [-t] [-n NUM] expression\n\n"                \
+            "optional arguments:\n"                                            \
+            "  -h,     show this help message and exit\n"                      \
+            "  -b,     use basic parser mode (default)\n"                      \
+            "  -a,     use AST parser mode\n"                                  \
+            "  -t,     print calculation time to stderr\n"                     \
             "  -n NUM, number of calculations\n", argv[0]);
 
 int

@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include "config.h"
 
-#define YYSTYPE ast_node_t *
-
 typedef enum {
     NT_NUM,
     NT_PLUS,
@@ -25,12 +23,6 @@ typedef struct ast_node_t {
         };
     };
 } ast_node_t;
-
-typedef struct arena_node_t {
-    ast_node_t *ast;
-    size_t capacity;
-    size_t allocated;
-} arena_node_t;
 
 ast_node_t *node_value_create (calc_value_t);
 ast_node_t *node_op_create (node_type_t, ast_node_t *, ast_node_t *);

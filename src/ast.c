@@ -1,8 +1,16 @@
 #include "ast.h"
+
+#define YYSTYPE ast_node_t *
 #include "lexer.h"
 
 #define ARENA_INIT_CAPACITY 16
 #define ARENA_CAPACITY_GROWTH 2
+
+typedef struct arena_node_t {
+    ast_node_t *ast;
+    size_t capacity;
+    size_t allocated;
+} arena_node_t;
 
 arena_node_t *
 arena_init (void)
