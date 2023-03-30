@@ -14,7 +14,7 @@ lexer.h lexer.c: lexer.l
 parser.h parser.c: parser.y
 	$(YACC) -Wall -o parser.c -d $<
 
-main: main.o ast.o basic_calc.o ast_calc.o lexer.o
+main: main.o basic_calc.o ast_calc.o lexer.o
 main.o: lexer.h basic_calc.h ast_calc.h
 basic_calc.o ast_calc.o: parser.h
 
