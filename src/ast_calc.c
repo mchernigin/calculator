@@ -51,7 +51,7 @@ init_ast_calc (char *expr)
     }
 
     if (0 != ast_parse (scanner)) {
-        fprintf (stderr, "error: cannot parse string\n");
+        perror ("error: cannot parse given string");
         goto fail_free_scanner;
     }
 

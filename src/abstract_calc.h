@@ -9,8 +9,8 @@ typedef struct abstract_calc_t {
     char *expr;
     calc_value_t result;
 
-    int (*run) (struct abstract_calc_t *calc);
-    void (*destroy) (struct abstract_calc_t *calc);
+    int (*run) (struct abstract_calc_t *);
+    void (*destroy) (struct abstract_calc_t *);
 } abstract_calc_t;
 
 static inline int

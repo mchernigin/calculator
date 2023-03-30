@@ -20,12 +20,12 @@ run_basic_calc (abstract_calc_t *calc)
     basic_calc_t *basic_calc = (basic_calc_t *) calc;
 
     if (NULL == yy_scan_string (basic_calc->base.expr, basic_calc->scanner)) {
-        fprintf (stderr, "error: cannot set string to parse\n");
+        perror ("error: cannot set string to parse");
         return (EXIT_FAILURE);
     }
 
     if (0 != basic_parse (basic_calc->scanner)) {
-        fprintf (stderr, "error: cannot parse string\n");
+        perror ("error: cannot parse string");
         return (EXIT_FAILURE);
     }
 
@@ -46,14 +46,12 @@ init_basic_calc (char *expr)
     basic_calc_t *calc = (basic_calc_t *) malloc (sizeof (*calc));
 
     if (NULL == calc) {
-        fprintf (stderr, "error: cannot create calculator: %s\n",
-                 strerror (errno));
+        perror ("error: cannot create calculator");
         return (NULL);
     }
 
     if (0 != yylex_init_extra (&calc->base.result, &calc->scanner)) {
-        fprintf (stderr, "error: cannot initialize scanner: %s\n",
-                 strerror (errno));
+        perror ("error: cannot initialize scanner");
         free (calc);
         return (NULL);
     }

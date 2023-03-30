@@ -9,12 +9,18 @@ arena_init (void)
 {
     arena_node_t *arena = malloc (sizeof (*arena));
 
+    if (NULL == arena) {
+        perror ("error: cannot initialize arena");
+        return (NULL);
+    }
+
     arena->capacity = ARENA_INIT_CAPACITY;
     arena->allocated = 0;
     arena->ast = malloc (arena->capacity * sizeof (*arena->ast));
 
     if (NULL == arena->ast) {
-        perror ("error: cannot initialize areana");
+        perror ("error: cannot initialize arena");
+        free (arena);
         return (NULL);
     }
 
@@ -42,7 +48,7 @@ arena_allocate (arena_node_t *arena, size_t alloc_size)
             realloc (arena->ast, new_capacity * sizeof (*arena->ast));
 
         if (NULL == arena->ast) {
-            perror ("error: cannot reallocate areana");
+            perror ("error: cannot reallocate arena");
             return (-1);
         }
 
@@ -61,7 +67,7 @@ node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)
     ast_node_t *node = (ast_node_t *) malloc (sizeof (*node));
 
     if (NULL == node) {
-        fprintf (stderr, "error: cannot create a node: not enough memory\n");
+        perror ("error: cannot create a node");
         return (NULL);
     }
 
@@ -78,7 +84,7 @@ node_value_create (calc_value_t value)
     ast_node_t *node = (ast_node_t *) malloc (sizeof (*node));
 
     if (NULL == node) {
-        fprintf (stderr, "error: cannot create a node: not enough memory\n");
+        perror ("error: cannot create a node");
         return (NULL);
     }
 
