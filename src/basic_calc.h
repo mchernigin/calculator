@@ -3,6 +3,6 @@
 
 #include "abstract_calc.h"
 
-abstract_calc_t *init_basic_calc (char *);
+abstract_calc_t *basic_calc_init (char *);
 
 #endif // BASIC_CALC_H

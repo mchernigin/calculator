@@ -3,6 +3,6 @@
 
 #include "abstract_calc.h"
 
-abstract_calc_t *init_ast_calc (char *expr);
+abstract_calc_t *ast_calc_init (char *);
 
 #endif // AST_CALC_H

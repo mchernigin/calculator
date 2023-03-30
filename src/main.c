@@ -20,7 +20,7 @@
 int
 parse_args (config_t *config, int argc, char *argv[])
 {
-    opterr = 0;     // Suppress getopt error printing
+    opterr = 0; // Suppress getopt error printing
     int opt;
     while (-1 != (opt = getopt (argc, argv, "hban:t"))) {
         switch (opt) {
@@ -81,10 +81,10 @@ main (int argc, char *argv[])
 
     switch (config.mode) {
     case MODE_BASIC:
-        calc = init_basic_calc (config.expr);
+        calc = basic_calc_init (config.expr);
         break;
     case MODE_AST:
-        calc = init_ast_calc (config.expr);
+        calc = ast_calc_init (config.expr);
         break;
     default: // MODE_BASIC by default and can only be switched to MODE_AST
         __builtin_unreachable ();

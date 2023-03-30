@@ -19,7 +19,7 @@ typedef struct basic_calc_t {
 } basic_calc_t ;
 
 int
-run_basic_calc (abstract_calc_t *calc)
+basic_calc_run (abstract_calc_t *calc)
 {
     basic_calc_t *basic_calc = (basic_calc_t *) calc;
 
@@ -29,7 +29,7 @@ run_basic_calc (abstract_calc_t *calc)
     }
 
     if (0 != basic_parse (basic_calc->scanner)) {
-        perror ("error: cannot parse string");
+        fprintf (stderr, "error: cannot parse given string\n");
         return (EXIT_FAILURE);
     }
 
@@ -37,7 +37,7 @@ run_basic_calc (abstract_calc_t *calc)
 }
 
 void
-destroy_basic_calc (abstract_calc_t *calc)
+basic_calc_destroy (abstract_calc_t *calc)
 {
     basic_calc_t *basic_calc = (basic_calc_t *) calc;
     yylex_destroy (basic_calc->scanner);
@@ -45,10 +45,9 @@ destroy_basic_calc (abstract_calc_t *calc)
 }
 
 abstract_calc_t *
-init_basic_calc (char *expr)
+basic_calc_init (char *expr)
 {
     basic_calc_t *calc = (basic_calc_t *) malloc (sizeof (*calc));
-
     if (NULL == calc) {
         perror ("error: cannot create calculator");
         return (NULL);
@@ -61,8 +60,8 @@ init_basic_calc (char *expr)
     }
 
     calc->base.expr = expr;
-    calc->base.run = run_basic_calc;
-    calc->base.destroy = destroy_basic_calc;
+    calc->base.run = basic_calc_run;
+    calc->base.destroy = basic_calc_destroy;
 
     return (&calc->base);
 }

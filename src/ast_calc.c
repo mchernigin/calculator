@@ -34,7 +34,6 @@ arena_node_t *
 arena_init (void)
 {
     arena_node_t *arena = malloc (sizeof (*arena));
-
     if (NULL == arena) {
         perror ("error: cannot initialize arena");
         return (NULL);
@@ -43,7 +42,6 @@ arena_init (void)
     arena->capacity = ARENA_INIT_CAPACITY;
     arena->allocated = 0;
     arena->ast = malloc (arena->capacity * sizeof (*arena->ast));
-
     if (NULL == arena->ast) {
         perror ("error: cannot initialize arena");
         free (arena);
@@ -91,7 +89,6 @@ static ast_node_t *
 node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)
 {
     ast_node_t *node = (ast_node_t *) malloc (sizeof (*node));
-
     if (NULL == node) {
         perror ("error: cannot create a node");
         return (NULL);
@@ -108,7 +105,6 @@ static ast_node_t *
 node_value_create (calc_value_t value)
 {
     ast_node_t *node = (ast_node_t *) malloc (sizeof (*node));
-
     if (NULL == node) {
         perror ("error: cannot create a node");
         return (NULL);
@@ -174,7 +170,7 @@ typedef struct ast_calc_t {
 } ast_calc_t;
 
 int
-run_ast_calc (abstract_calc_t *calc)
+ast_calc_run (abstract_calc_t *calc)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
     ast_calc->base.result = ast_eval (ast_calc->ast);
@@ -182,7 +178,7 @@ run_ast_calc (abstract_calc_t *calc)
 }
 
 void
-destroy_ast_calc (abstract_calc_t *calc)
+ast_calc_destroy (abstract_calc_t *calc)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
     ast_free (ast_calc->ast);
@@ -190,10 +186,9 @@ destroy_ast_calc (abstract_calc_t *calc)
 }
 
 abstract_calc_t *
-init_ast_calc (char *expr)
+ast_calc_init (char *expr)
 {
     ast_calc_t *calc = (ast_calc_t *) malloc (sizeof (*calc));
-
     if (NULL == calc) {
         perror ("error: cannot create calculator");
         return (NULL);
@@ -212,13 +207,13 @@ init_ast_calc (char *expr)
     }
 
     if (0 != ast_parse (scanner)) {
-        perror ("error: cannot parse given string");
+        fprintf (stderr, "error: cannot parse given string\n");
         goto fail_free_scanner;
     }
 
     calc->base.expr = expr;
-    calc->base.run = run_ast_calc;
-    calc->base.destroy = destroy_ast_calc;
+    calc->base.run = ast_calc_run;
+    calc->base.destroy = ast_calc_destroy;
 
     yylex_destroy (scanner);
 
