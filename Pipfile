@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 seaborn = "*"
+pytest = "*"
 
 [dev-packages]
 
