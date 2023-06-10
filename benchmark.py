@@ -45,17 +45,17 @@ def draw_progress(count, total, bar_len=20):
     sys.stdout.flush()
 
 
-def benchmark(cfg, mode, flag, sizes):
+def benchmark(cfg, mode, sizes):
     time = []
     for i, numberop in enumerate(sizes):
         if cfg.random:
             exp = gen_exp_rand(numberop)
         else:
             exp = gen_exp_easy(numberop)
-        cmd = [BIN, "-t", flag, "-n", str(cfg.numcalc), exp]
+        cmd = [BIN, "-t", "-p", mode, "-n", str(cfg.numcalc), exp]
         result = subprocess.run(cmd, capture_output=True)
         time.append(float(result.stderr.decode().strip()))
-        print(f"Running {mode} version", end="\t")
+        print(f"Running {mode} version".ljust(25), end="")
         draw_progress(i, len(sizes) - 1)
     print()
     return time
@@ -88,18 +88,20 @@ def main():
     sizes = [x for x in range(cfg.min, cfg.max + 1, (cfg.max - cfg.min) // 25)]
 
     random.seed(cfg.seed)
-    parser_time = benchmark(cfg, "basic", "-b", sizes)
-    ast_time = benchmark(cfg, "ast", "-a", sizes)
+    basic_time = benchmark(cfg, "basic", sizes)
+    ast_rec_time = benchmark(cfg, "ast_rec", sizes)
+    ast_iter_time = benchmark(cfg, "ast_iter", sizes)
 
-    plt.plot(sizes, parser_time)
-    plt.plot(sizes, ast_time)
+    plt.plot(sizes, basic_time)
+    plt.plot(sizes, ast_rec_time)
+    plt.plot(sizes, ast_iter_time)
     ax = sns.lineplot()
 
     ax.set_xlabel("Number of operators")
     ax.set_ylabel("Time")
-    plt.legend(labels=["Basic parser", "AST parser"])
+    plt.legend(labels=["Basic parser", "AST rec parser", "AST iter parser"])
 
-    # plt.yscale("log")
+    plt.yscale("log")
 
     ax.grid(visible=True, color="#DDDDDD")
     plt.savefig(cfg.output, dpi=600)
