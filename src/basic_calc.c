@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include "abstract_calc.h"
 #include "basic_calc.h"
 
 #define EVAL_RESULT(VALUE) {                                                   \
@@ -21,7 +23,7 @@ typedef struct basic_calc_t {
     yyscan_t scanner;
 } basic_calc_t ;
 
-int
+static int
 basic_calc_run (abstract_calc_t *calc)
 {
     basic_calc_t *basic_calc = (basic_calc_t *) calc;
@@ -39,7 +41,7 @@ basic_calc_run (abstract_calc_t *calc)
     return (EXIT_SUCCESS);
 }
 
-void
+static void
 basic_calc_destroy (abstract_calc_t *calc)
 {
     basic_calc_t *basic_calc = (basic_calc_t *) calc;
@@ -47,7 +49,7 @@ basic_calc_destroy (abstract_calc_t *calc)
     free (basic_calc);
 }
 
-abstract_calc_t *
+static abstract_calc_t *
 basic_calc_init (char *expr)
 {
     basic_calc_t *calc = (basic_calc_t *) malloc (sizeof (*calc));
@@ -63,9 +65,12 @@ basic_calc_init (char *expr)
     }
 
     calc->base.expr = expr;
-    calc->base.run = basic_calc_run;
-    calc->base.destroy = basic_calc_destroy;
 
     return (&calc->base);
 }
 
+calc_funcs_t calc_basic_funcs = {
+    .init = basic_calc_init,
+    .run = basic_calc_run,
+    .destroy = basic_calc_destroy
+};

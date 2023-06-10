@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-#include "config.h"
 #include "abstract_calc.h"
 #include "basic_calc.h"
 #include "ast_calc.h"
@@ -17,21 +18,35 @@
             "  -t,     print calculation time to stderr\n"                     \
             "  -n NUM, number of calculations\n", argv[0]);
 
+typedef struct config_t {
+    char *expr;
+    unsigned long iteration_number;
+    calc_funcs_t *calc_funcs;
+    bool print_time;
+} config_t;
+
 int
 parse_args (config_t *config, int argc, char *argv[])
 {
     opterr = 0; // Suppress getopt error printing
     int opt;
-    while (-1 != (opt = getopt (argc, argv, "hban:t"))) {
+    while (-1 != (opt = getopt (argc, argv, "hp:ban:t"))) {
         switch (opt) {
         case 'h':
             USAGE ();
             return (EXIT_FAILURE);
-        case 'b':
-            config->mode = MODE_BASIC;
-            break;
-        case 'a':
-            config->mode = MODE_AST;
+        case 'p':
+            if (strcmp (optarg, "basic") == 0) {
+                config->calc_funcs = &calc_basic_funcs;
+            } else if (strcmp (optarg, "ast_rec") == 0) {
+                config->calc_funcs = &calc_ast_rec_funcs;
+            } else if (strcmp (optarg, "ast_iter") == 0) {
+                config->calc_funcs = &calc_ast_iter_funcs;
+            } else {
+                fprintf (stderr, "error: unexpected parser\n");
+                USAGE ();
+                return (EXIT_FAILURE);
+            }
             break;
         case 'n':
         {
@@ -55,6 +70,10 @@ parse_args (config_t *config, int argc, char *argv[])
         }
     }
 
+    if (NULL == config->calc_funcs) {
+        config->calc_funcs = &calc_basic_funcs;
+    }
+
     config->expr = argv[optind];
     if (NULL == config->expr) {
         fprintf (stderr, "error: no expression was provided\n");
@@ -70,29 +89,15 @@ main (int argc, char *argv[])
 {
     config_t config = {
         .iteration_number = 1,
-        .mode = MODE_BASIC,
+        .calc_funcs = &calc_basic_funcs,
         .print_time = false,
     };
     if (0 != parse_args (&config, argc, argv)) {
         return (EXIT_FAILURE);
     }
 
-    abstract_calc_t *calc;
-
-    switch (config.mode) {
-    case MODE_BASIC:
-        calc = basic_calc_init (config.expr);
-        break;
-    case MODE_AST:
-        calc = ast_calc_init (config.expr);
-        break;
-    default: // MODE_BASIC by default and can only be switched to MODE_AST
-        __builtin_unreachable ();
-    }
-
-    if (NULL == calc) {
-        return (EXIT_FAILURE);
-    }
+    abstract_calc_t *calc = config.calc_funcs->init(config.expr);
+    calc->funcs = config.calc_funcs;
 
     int exit_code = EXIT_SUCCESS;
 

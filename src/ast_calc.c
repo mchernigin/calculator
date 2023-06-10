@@ -1,5 +1,7 @@
 #include <stdio.h>
-#include "ast_calc.h"
+#include <stdlib.h>
+#include "abstract_calc.h"
+#include "config.h"
 
 typedef enum {
     NT_NUM,
@@ -139,7 +141,7 @@ ast_eval_rec (arena_node_t *arena, int index)
 #define EVAL_MUL(LHS, LEFT, RIGHT) AST_BIN_OP(LHS, NT_MUL, LEFT, RIGHT)
 #define EVAL_DIV(LHS, LEFT, RIGHT) AST_BIN_OP(LHS, NT_DIV, LEFT, RIGHT)
 static ast_node_t zero = { .value = 0, .node_type = NT_NUM, };
-#define EVAL_NEG(LHS, VALUE)       AST_BIN_OP(LHS, NT_MINUS, zero, VALUE)
+#define EVAL_NEG(LHS, VALUE) AST_BIN_OP(LHS, NT_MINUS, zero, VALUE)
 
 #define YYSTYPE ast_node_t
 #define yyparse ast_parse
@@ -150,8 +152,8 @@ typedef struct ast_calc_t {
     arena_node_t *arena;
 } ast_calc_t;
 
-int
-ast_calc_run (abstract_calc_t *calc)
+static int
+ast_calc_rec_run (abstract_calc_t *calc)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
     ast_calc->base.result =
@@ -159,7 +161,40 @@ ast_calc_run (abstract_calc_t *calc)
     return (EXIT_SUCCESS);
 }
 
-void
+static int
+ast_calc_iter_run (abstract_calc_t *calc)
+{
+    ast_calc_t *ast_calc = (ast_calc_t *) calc;
+    calc_value_t results[ast_calc->arena->allocated];
+
+    for (size_t i = 0; i < ast_calc->arena->allocated; ++i) {
+        ast_node_t *node = &ast_calc->arena->ast[i];
+        switch (node->node_type) {
+        case NT_NUM:
+          results[i] = node->value;
+          break;
+        case NT_PLUS:
+          results[i] = results[node->left] + results[node->right];
+          break;
+        case NT_MINUS:
+          results[i] = results[node->left] - results[node->right];
+          break;
+        case NT_MUL:
+          results[i] = results[node->left] * results[node->right];
+          break;
+        case NT_DIV:
+          results[i] = results[node->left] / results[node->right];
+          break;
+        case NT_NEG:
+          results[i] = -results[node->left];
+          break;
+        }
+    }
+    ast_calc->base.result = results[ast_calc->arena->allocated - 1];
+    return (EXIT_SUCCESS);
+}
+
+static void
 ast_calc_destroy (abstract_calc_t *calc)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
@@ -167,7 +202,7 @@ ast_calc_destroy (abstract_calc_t *calc)
     free (ast_calc);
 }
 
-abstract_calc_t *
+static abstract_calc_t *
 ast_calc_init (char *expr)
 {
     ast_calc_t *calc = (ast_calc_t *) malloc (sizeof (*calc));
@@ -199,8 +234,6 @@ ast_calc_init (char *expr)
     }
 
     calc->base.expr = expr;
-    calc->base.run = ast_calc_run;
-    calc->base.destroy = ast_calc_destroy;
 
     yylex_destroy (scanner);
 
@@ -214,4 +247,16 @@ fail_free_calc:
 
     return (NULL);
 }
+
+calc_funcs_t calc_ast_rec_funcs = {
+    .init = ast_calc_init,
+    .run = ast_calc_rec_run,
+    .destroy = ast_calc_destroy
+};
+
+calc_funcs_t calc_ast_iter_funcs = {
+    .init = ast_calc_init,
+    .run = ast_calc_iter_run,
+    .destroy = ast_calc_destroy
+};
 

@@ -3,6 +3,7 @@
 
 #include "abstract_calc.h"
 
-abstract_calc_t *ast_calc_init (char *);
+extern calc_funcs_t calc_ast_rec_funcs;
+extern calc_funcs_t calc_ast_iter_funcs;
 
 #endif // AST_CALC_H
