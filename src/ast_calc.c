@@ -14,7 +14,6 @@ typedef enum {
 } node_type_t;
 
 typedef struct ast_node_t {
-    node_type_t node_type;
     union {
         calc_value_t value;
         struct {
@@ -22,6 +21,7 @@ typedef struct ast_node_t {
             struct ast_node_t *right;
         };
     };
+    node_type_t node_type;
 } ast_node_t;
 
 typedef struct arena_node_t {
@@ -152,13 +152,17 @@ ast_free (ast_node_t *ast)
     }
 }
 
-#define EVAL(value) YYSTYPE *res = yyget_extra (scanner); *res = value;
-#define EVAL_NUM(node)        node_value_create (*((calc_value_t *) &node));
-#define EVAL_ADD(left, right) node_op_create (NT_PLUS, left, right)
-#define EVAL_SUB(left, right) node_op_create (NT_MINUS, left, right)
-#define EVAL_MUL(left, right) node_op_create (NT_MUL, left, right)
-#define EVAL_DIV(left, right) node_op_create (NT_DIV, left, right)
-#define EVAL_NEG(value)       node_op_create (NT_NEG, value, NULL)
+#define EVAL_RESULT(VALUE) {                                                   \
+    YYSTYPE *res = yyget_extra (scanner);                                      \
+    *res = VALUE;                                                              \
+}
+
+#define EVAL_NUM(LHS, NODE) LHS = node_value_create (*(calc_value_t *) &NODE);
+#define EVAL_ADD(LHS, LEFT, RIGHT) LHS = node_op_create (NT_PLUS, LEFT, RIGHT)
+#define EVAL_SUB(LHS, LEFT, RIGHT) LHS = node_op_create (NT_MINUS, LEFT, RIGHT)
+#define EVAL_MUL(LHS, LEFT, RIGHT) LHS = node_op_create (NT_MUL, LEFT, RIGHT)
+#define EVAL_DIV(LHS, LEFT, RIGHT) LHS = node_op_create (NT_DIV, LEFT, RIGHT)
+#define EVAL_NEG(LHS, VALUE)       LHS = node_op_create (NT_NEG, VALUE, NULL)
 
 #define YYSTYPE ast_node_t *
 #define yyparse ast_parse

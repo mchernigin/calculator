@@ -1,13 +1,16 @@
 #include "basic_calc.h"
-#include "parser.h"
 
-#define EVAL(value) YYSTYPE *res = yyget_extra (scanner); *res = value;
-#define EVAL_NUM(value)       (value)
-#define EVAL_ADD(left, right) (left + right)
-#define EVAL_SUB(left, right) (left - right)
-#define EVAL_MUL(left, right) (left * right)
-#define EVAL_DIV(left, right) (left / right)
-#define EVAL_NEG(value)       (-value)
+#define EVAL_RESULT(VALUE) {                                                   \
+    calc_value_t *res = yyget_extra (scanner);                                 \
+    *res = VALUE;                                                              \
+}
+
+#define EVAL_NUM(LHS, VALUE)       LHS = VALUE
+#define EVAL_ADD(LHS, LEFT, RIGHT) LHS = LEFT + RIGHT
+#define EVAL_SUB(LHS, LEFT, RIGHT) LHS = LEFT - RIGHT
+#define EVAL_MUL(LHS, LEFT, RIGHT) LHS = LEFT * RIGHT
+#define EVAL_DIV(LHS, LEFT, RIGHT) LHS = LEFT / RIGHT
+#define EVAL_NEG(LHS, VALUE)       LHS = -VALUE
 
 #define YYSTYPE calc_value_t
 #define yyparse basic_parse
