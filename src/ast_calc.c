@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include "ast_calc.h"
 
-#define ARENA_INIT_CAPACITY 16
-#define ARENA_CAPACITY_GROWTH 2
-
 typedef enum {
     NT_NUM,
     NT_PLUS,
@@ -30,8 +27,11 @@ typedef struct arena_node_t {
     size_t allocated;
 } arena_node_t;
 
-arena_node_t *
-arena_init (void)
+#define ARENA_INIT_CAPACITY 16
+#define ARENA_CAPACITY_GROWTH 2
+
+static arena_node_t *
+arena_create (void)
 {
     arena_node_t *arena = malloc (sizeof (*arena));
     if (NULL == arena) {
@@ -51,7 +51,7 @@ arena_init (void)
     return (arena);
 }
 
-void
+static void
 arena_destroy (arena_node_t *arena)
 {
     if (NULL != arena->ast) {
@@ -61,7 +61,7 @@ arena_destroy (arena_node_t *arena)
     free (arena);
 }
 
-int
+static int
 arena_allocate (arena_node_t *arena, size_t alloc_size)
 {
     size_t new_alloc_size = arena->allocated + alloc_size;
@@ -86,13 +86,14 @@ arena_allocate (arena_node_t *arena, size_t alloc_size)
 }
 
 static ast_node_t *
-node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)
+node_op_create (arena_node_t *arena, node_type_t node_type, ast_node_t *left,
+                ast_node_t *right)
 {
-    ast_node_t *node = (ast_node_t *) malloc (sizeof (*node));
-    if (NULL == node) {
-        perror ("error: cannot create a node");
+    int index = arena_allocate (arena, 1);
+    if (index < 0) {
         return (NULL);
     }
+    ast_node_t *node = arena->ast + index;
 
     node->node_type = node_type;
     node->left = left;
@@ -102,13 +103,13 @@ node_op_create (node_type_t node_type, ast_node_t *left, ast_node_t *right)
 }
 
 static ast_node_t *
-node_value_create (calc_value_t value)
+node_num_create (arena_node_t *arena, calc_value_t value)
 {
-    ast_node_t *node = (ast_node_t *) malloc (sizeof (*node));
-    if (NULL == node) {
-        perror ("error: cannot create a node");
+    int index = arena_allocate (arena, 1);
+    if (index < 0) {
         return (NULL);
     }
+    ast_node_t *node = arena->ast + index;
 
     node->node_type = NT_NUM;
     node->value = value;
@@ -117,20 +118,21 @@ node_value_create (calc_value_t value)
 }
 
 static calc_value_t
-ast_eval (ast_node_t *ast)
+ast_eval_rec (ast_node_t *ast)
 {
     switch (ast->node_type) {
     case NT_NUM:   return (ast->value);
-    case NT_PLUS:  return (ast_eval (ast->left) + ast_eval (ast->right));
-    case NT_MINUS: return (ast_eval (ast->left) - ast_eval (ast->right));
-    case NT_MUL:   return (ast_eval (ast->left) * ast_eval (ast->right));
-    case NT_DIV:   return (ast_eval (ast->left) / ast_eval (ast->right));
-    case NT_NEG:   return (-ast_eval (ast->left));
+    case NT_PLUS:  return (ast_eval_rec (ast->left) + ast_eval_rec (ast->right));
+    case NT_MINUS: return (ast_eval_rec (ast->left) - ast_eval_rec (ast->right));
+    case NT_MUL:   return (ast_eval_rec (ast->left) * ast_eval_rec (ast->right));
+    case NT_DIV:   return (ast_eval_rec (ast->left) / ast_eval_rec (ast->right));
+    case NT_NEG:   return (-ast_eval_rec (ast->left));
     default:
         __builtin_unreachable ();
     }
 }
 
+#if 0
 static void
 ast_free (ast_node_t *ast)
 {
@@ -151,18 +153,45 @@ ast_free (ast_node_t *ast)
         __builtin_unreachable ();
     }
 }
+#endif
 
 #define EVAL_RESULT(VALUE) {                                                   \
-    YYSTYPE *res = yyget_extra (scanner);                                      \
-    *res = VALUE;                                                              \
+    arena_node_t *arena = yyget_extra (scanner);                               \
+    int index = arena_allocate (arena, 1);                                     \
+    if (index >= 0) {                                                          \
+        arena->ast[index] = *VALUE;                                            \
+    }                                                                          \
 }
 
-#define EVAL_NUM(LHS, NODE) LHS = node_value_create (*(calc_value_t *) &NODE);
-#define EVAL_ADD(LHS, LEFT, RIGHT) LHS = node_op_create (NT_PLUS, LEFT, RIGHT)
-#define EVAL_SUB(LHS, LEFT, RIGHT) LHS = node_op_create (NT_MINUS, LEFT, RIGHT)
-#define EVAL_MUL(LHS, LEFT, RIGHT) LHS = node_op_create (NT_MUL, LEFT, RIGHT)
-#define EVAL_DIV(LHS, LEFT, RIGHT) LHS = node_op_create (NT_DIV, LEFT, RIGHT)
-#define EVAL_NEG(LHS, VALUE)       LHS = node_op_create (NT_NEG, VALUE, NULL)
+#define EVAL_NUM(LHS, NODE) {                                                  \
+    arena_node_t *arena = yyget_extra (scanner);                               \
+    LHS = node_num_create (arena, *(calc_value_t *) &NODE);                    \
+}
+
+#define EVAL_ADD(LHS, LEFT, RIGHT) {                                           \
+    arena_node_t *arena = yyget_extra (scanner);                               \
+    LHS = node_op_create (arena, NT_PLUS, LEFT, RIGHT);                        \
+}
+
+#define EVAL_SUB(LHS, LEFT, RIGHT) {                                           \
+    arena_node_t *arena = yyget_extra (scanner);                               \
+    LHS = node_op_create (arena, NT_MINUS, LEFT, RIGHT);                       \
+}
+
+#define EVAL_MUL(LHS, LEFT, RIGHT) {                                           \
+    arena_node_t *arena = yyget_extra (scanner);                               \
+    LHS = node_op_create (arena, NT_MUL, LEFT, RIGHT);                         \
+}
+
+#define EVAL_DIV(LHS, LEFT, RIGHT) {                                           \
+    arena_node_t *arena = yyget_extra (scanner);                               \
+    LHS = node_op_create (arena, NT_DIV, LEFT, RIGHT);                         \
+}
+
+#define EVAL_NEG(LHS, VALUE) {                                                 \
+    arena_node_t *arena = yyget_extra (scanner);                               \
+    LHS = node_op_create (arena, NT_NEG, VALUE, NULL);                         \
+}
 
 #define YYSTYPE ast_node_t *
 #define yyparse ast_parse
@@ -170,14 +199,15 @@ ast_free (ast_node_t *ast)
 
 typedef struct ast_calc_t {
     abstract_calc_t base;
-    ast_node_t *ast;
+    arena_node_t *arena;
 } ast_calc_t;
 
 int
 ast_calc_run (abstract_calc_t *calc)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
-    ast_calc->base.result = ast_eval (ast_calc->ast);
+    ast_calc->base.result =
+        ast_eval_rec (&ast_calc->arena->ast[ast_calc->arena->allocated - 1]);
     return (EXIT_SUCCESS);
 }
 
@@ -185,7 +215,7 @@ void
 ast_calc_destroy (abstract_calc_t *calc)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
-    ast_free (ast_calc->ast);
+    arena_destroy (ast_calc->arena);
     free (ast_calc);
 }
 
@@ -198,9 +228,14 @@ ast_calc_init (char *expr)
         return (NULL);
     }
 
+    calc->arena = arena_create();
+    if (NULL == calc->arena) {
+        return (NULL);
+    }
+
     yyscan_t scanner = NULL;
 
-    if (0 != yylex_init_extra (&calc->ast, &scanner)) {
+    if (0 != yylex_init_extra (calc->arena, &scanner)) {
         perror ("error: cannot initialize scanner");
         goto fail_free_calc;
     }
