@@ -7,20 +7,25 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-BIN = "./src/calc"
+CALC_BIN = "./src/calc"
+MODES = ["basic", "ast_rec", "ast_iter"]
+LABELS = ["Basic", "AST recursive", "AST iterative"]
+LINES_STYLES = ["solid", "dashed", "dashdot"]
 
 
-def gen_num(boundary, use_float, precision):
+def gen_num(boundary: int, use_float: bool, precision: int) -> int | float:
     if not use_float:
         return random.randint(1, boundary)
     return max(round(random.random() * boundary, precision), 1)
 
 
-def gen_exp_easy(numberop):
+def gen_exp_easy(numberop: int) -> str:
     return "1+1*1" * (numberop // 2) + ("+1" * (numberop % 2))
 
 
-def gen_exp_rand(numberop, boundary=10, use_float=True, precision=3):
+def gen_exp_rand(
+    numberop: int, boundary: int = 10, use_float: bool = True, precision: int = 3
+) -> str:
     exp = "("
     parant_count = 0
     for _ in range(numberop):
@@ -37,7 +42,7 @@ def gen_exp_rand(numberop, boundary=10, use_float=True, precision=3):
     return exp
 
 
-def draw_progress(count, total, bar_len=20):
+def draw_progress(count: int, total: int, bar_len: int = 20) -> None:
     filled_len = round(bar_len * count / float(total))
     percents = int(round(100.0 * count / float(total), 1))
     bar = "#" * filled_len + "." * (bar_len - filled_len)
@@ -45,14 +50,14 @@ def draw_progress(count, total, bar_len=20):
     sys.stdout.flush()
 
 
-def benchmark(cfg, mode, sizes):
-    time = []
+def benchmark(cfg: argparse.Namespace, mode: str, sizes: list[int]) -> list[float]:
+    time: list[float] = []
     for i, numberop in enumerate(sizes):
         if cfg.random:
             exp = gen_exp_rand(numberop)
         else:
             exp = gen_exp_easy(numberop)
-        cmd = [BIN, "-t", "-p", mode, "-n", str(cfg.numcalc), exp]
+        cmd = [CALC_BIN, "-t", "-p", mode, "-n", str(cfg.numcalc), exp]
         result = subprocess.run(cmd, capture_output=True)
         time.append(float(result.stderr.decode().strip()))
         print(f"Running {mode} version".ljust(25), end="")
@@ -64,15 +69,26 @@ def benchmark(cfg, mode, sizes):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-r", "--random", help="random exressions", nargs="?", type=bool,
-        const=True, default=False,
+        "-r",
+        "--random",
+        help="random exressions",
+        nargs="?",
+        type=bool,
+        const=True,
+        default=False,
     )
     parser.add_argument(
-        "-s", "--seed", help="random seed", type=int, default=0
+        "-l",
+        "--log-scale",
+        help="use log scale",
+        nargs="?",
+        type=bool,
+        const=True,
+        default=False,
     )
+    parser.add_argument("-s", "--seed", help="random seed", type=int, default=0)
     parser.add_argument(
-        "-n", "--numcalc", help="number of calculations", type=int,
-        default=50_000
+        "-n", "--numcalc", help="number of calculations", type=int, default=50_000
     )
     parser.add_argument(
         "-m", "--min", help="minimal expression length", type=int, default=10
@@ -84,25 +100,22 @@ def main():
         "-o", "--output", help="output file", type=str, default="graph.png"
     )
     cfg = parser.parse_args()
-
-    sizes = [x for x in range(cfg.min, cfg.max + 1, (cfg.max - cfg.min) // 25)]
-
     random.seed(cfg.seed)
-    basic_time = benchmark(cfg, "basic", sizes)
-    ast_rec_time = benchmark(cfg, "ast_rec", sizes)
-    ast_iter_time = benchmark(cfg, "ast_iter", sizes)
 
-    plt.plot(sizes, basic_time)
-    plt.plot(sizes, ast_rec_time)
-    plt.plot(sizes, ast_iter_time)
+    sizes = [x for x in range(cfg.min, cfg.max + 1, 10)]
+    times = [benchmark(cfg, mode, sizes) for mode in MODES]
+
     ax = sns.lineplot()
+    for mode_time, style in zip(times, LINES_STYLES):
+        plt.plot(sizes, mode_time)
+        ax.lines[-1].set_linestyle(style)
+
+    if cfg.log_scale:
+        plt.yscale("log")
 
     ax.set_xlabel("Number of operators")
+    plt.legend(labels=LABELS)
     ax.set_ylabel("Time")
-    plt.legend(labels=["Basic parser", "AST rec parser", "AST iter parser"])
-
-    plt.yscale("log")
-
     ax.grid(visible=True, color="#DDDDDD")
     plt.savefig(cfg.output, dpi=600)
     print(f"Result has been saved into {cfg.output!r}")
@@ -110,4 +123,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

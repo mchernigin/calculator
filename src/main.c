@@ -29,7 +29,7 @@ parse_args (config_t *config, int argc, char *argv[])
 {
     opterr = 0; // Suppress getopt error printing
     int opt;
-    while (-1 != (opt = getopt (argc, argv, "hp:ban:t"))) {
+    while (-1 != (opt = getopt (argc, argv, "hp:n:t"))) {
         switch (opt) {
         case 'h':
             USAGE ();
