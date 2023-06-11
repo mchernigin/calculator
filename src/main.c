@@ -10,13 +10,12 @@
 #include "ast_calc.h"
 
 #define USAGE()                                                                \
-    printf ("usage: %s [-h] [-ba] [-t] [-n NUM] expression\n\n"                \
+    printf ("usage: %s [-h] [-p PARSER] [-t] [-n NUM] expression\n\n"          \
             "optional arguments:\n"                                            \
-            "  -h,     show this help message and exit\n"                      \
-            "  -b,     use basic parser mode (default)\n"                      \
-            "  -a,     use AST parser mode\n"                                  \
-            "  -t,     print calculation time to stderr\n"                     \
-            "  -n NUM, number of calculations\n", argv[0]);
+            "  -h,        show this help message and exit\n"                   \
+            "  -p PARSER, basic (default), ast_rec, ast_iter\n"                \
+            "  -t,        print calculation time to stderr\n"                  \
+            "  -n NUM,    number of calculations\n", argv[0]);
 
 typedef struct config_t {
     char *expr;
@@ -96,7 +95,7 @@ main (int argc, char *argv[])
         return (EXIT_FAILURE);
     }
 
-    abstract_calc_t *calc = config.calc_funcs->init(config.expr);
+    abstract_calc_t *calc = config.calc_funcs->init (config.expr);
     calc->funcs = config.calc_funcs;
 
     int exit_code = EXIT_SUCCESS;

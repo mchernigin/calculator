@@ -32,25 +32,18 @@ typedef struct arena_node_t {
 #define ARENA_INIT_CAPACITY 16
 #define ARENA_CAPACITY_GROWTH 2
 
-static arena_node_t *
-arena_create (void)
+static int
+arena_init (arena_node_t *arena)
 {
-    arena_node_t *arena = malloc (sizeof (*arena));
-    if (NULL == arena) {
-        perror ("error: cannot initialize arena");
-        return (NULL);
-    }
-
     arena->capacity = ARENA_INIT_CAPACITY;
     arena->allocated = 0;
     arena->ast = malloc (arena->capacity * sizeof (*arena->ast));
     if (NULL == arena->ast) {
         perror ("error: cannot initialize arena");
-        free (arena);
-        return (NULL);
+        return (EXIT_FAILURE);
     }
 
-    return (arena);
+    return (EXIT_SUCCESS);
 }
 
 static void
@@ -60,7 +53,7 @@ arena_destroy (arena_node_t *arena)
         free (arena->ast);
     }
 
-    free (arena);
+    arena->ast = NULL;
 }
 
 static int
@@ -70,7 +63,7 @@ arena_allocate (arena_node_t *arena, size_t alloc_size)
 
     if (new_alloc_size > arena->capacity) {
         size_t new_capacity = ARENA_CAPACITY_GROWTH * arena->capacity;
-        ast_node_t *new_asts =
+        ast_node_t *new_ast =
             realloc (arena->ast, new_capacity * sizeof (*arena->ast));
 
         if (NULL == arena->ast) {
@@ -78,7 +71,7 @@ arena_allocate (arena_node_t *arena, size_t alloc_size)
             return (-1);
         }
 
-        arena->ast = new_asts;
+        arena->ast = new_ast;
         arena->capacity = new_capacity;
     }
 
@@ -140,8 +133,7 @@ ast_eval_rec (arena_node_t *arena, int index)
 #define EVAL_SUB(LHS, LEFT, RIGHT) AST_BIN_OP(LHS, NT_MINUS, LEFT, RIGHT)
 #define EVAL_MUL(LHS, LEFT, RIGHT) AST_BIN_OP(LHS, NT_MUL, LEFT, RIGHT)
 #define EVAL_DIV(LHS, LEFT, RIGHT) AST_BIN_OP(LHS, NT_DIV, LEFT, RIGHT)
-static ast_node_t zero = { .value = 0, .node_type = NT_NUM, };
-#define EVAL_NEG(LHS, VALUE) AST_BIN_OP(LHS, NT_MINUS, zero, VALUE)
+#define EVAL_NEG(LHS, VALUE) AST_BIN_OP(LHS, NT_NEG, VALUE, (ast_node_t) {})
 
 #define YYSTYPE ast_node_t
 #define yyparse ast_parse
@@ -149,26 +141,26 @@ static ast_node_t zero = { .value = 0, .node_type = NT_NUM, };
 
 typedef struct ast_calc_t {
     abstract_calc_t base;
-    arena_node_t *arena;
+    arena_node_t arena;
 } ast_calc_t;
 
 static int
-ast_calc_rec_run (abstract_calc_t *calc)
+ast_calc_run_rec (abstract_calc_t *calc)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
     ast_calc->base.result =
-        ast_eval_rec (ast_calc->arena, ast_calc->arena->allocated - 1);
+        ast_eval_rec (&ast_calc->arena, ast_calc->arena.allocated - 1);
     return (EXIT_SUCCESS);
 }
 
 static int
-ast_calc_iter_run (abstract_calc_t *calc)
+ast_calc_run_iter (abstract_calc_t *calc)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
-    calc_value_t results[ast_calc->arena->allocated];
+    calc_value_t results[ast_calc->arena.allocated];
 
-    for (size_t i = 0; i < ast_calc->arena->allocated; ++i) {
-        ast_node_t *node = &ast_calc->arena->ast[i];
+    for (size_t i = 0; i < ast_calc->arena.allocated; ++i) {
+        ast_node_t *node = &ast_calc->arena.ast[i];
         switch (node->node_type) {
         case NT_NUM:
           results[i] = node->value;
@@ -190,7 +182,8 @@ ast_calc_iter_run (abstract_calc_t *calc)
           break;
         }
     }
-    ast_calc->base.result = results[ast_calc->arena->allocated - 1];
+
+    ast_calc->base.result = results[ast_calc->arena.allocated - 1];
     return (EXIT_SUCCESS);
 }
 
@@ -198,7 +191,7 @@ static void
 ast_calc_destroy (abstract_calc_t *calc)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
-    arena_destroy (ast_calc->arena);
+    arena_destroy (&ast_calc->arena);
     free (ast_calc);
 }
 
@@ -211,14 +204,13 @@ ast_calc_init (char *expr)
         return (NULL);
     }
 
-    calc->arena = arena_create();
-    if (NULL == calc->arena) {
+    if (0 != arena_init (&calc->arena)) {
         return (NULL);
     }
 
     yyscan_t scanner = NULL;
 
-    if (0 != yylex_init_extra (calc->arena, &scanner)) {
+    if (0 != yylex_init_extra (&calc->arena, &scanner)) {
         perror ("error: cannot initialize scanner");
         goto fail_free_calc;
     }
@@ -250,13 +242,13 @@ fail_free_calc:
 
 calc_funcs_t calc_ast_rec_funcs = {
     .init = ast_calc_init,
-    .run = ast_calc_rec_run,
+    .run = ast_calc_run_rec,
     .destroy = ast_calc_destroy
 };
 
 calc_funcs_t calc_ast_iter_funcs = {
     .init = ast_calc_init,
-    .run = ast_calc_iter_run,
+    .run = ast_calc_run_iter,
     .destroy = ast_calc_destroy
 };
 
