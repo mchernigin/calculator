@@ -29,15 +29,12 @@ run_calc (abstract_calc_t *calc)
     return (calc->funcs->run (calc));
 }
 
-static inline int
+static inline void
 destroy_calc (abstract_calc_t *calc)
 {
-    if (NULL == calc) {
-        return (EXIT_FAILURE);
+    if (NULL != calc) {
+        calc->funcs->destroy (calc);
     }
-
-    calc->funcs->destroy (calc);
-    return (EXIT_SUCCESS);
 }
 
 #endif // ABSTRACT_CALC_H

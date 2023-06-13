@@ -62,7 +62,7 @@ arena_allocate (arena_node_t *arena, size_t alloc_size)
     size_t new_alloc_size = arena->allocated + alloc_size;
 
     if (new_alloc_size > arena->capacity) {
-        size_t new_capacity = ARENA_CAPACITY_GROWTH * arena->capacity;
+        size_t new_capacity = ARENA_CAPACITY_GROWTH * new_alloc_size;
         ast_node_t *new_ast =
             realloc (arena->ast, new_capacity * sizeof (*arena->ast));
 
