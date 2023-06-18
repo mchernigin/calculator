@@ -3,11 +3,7 @@
 
 #include "abstract_calc.h"
 
-typedef struct ast_calc_t {
-    abstract_calc_t base;
-    ast_node_t *ast;
-} ast_calc_t;
-
-abstract_calc_t *init_ast_calc (char *expr);
+extern calc_funcs_t calc_ast_rec_funcs;
+extern calc_funcs_t calc_ast_iter_funcs;
 
 #endif // AST_CALC_H

@@ -1,5 +1,6 @@
 .*
 !.gitignore
+!.github
 
 *.o
 *parser.[ch]
@@ -13,3 +14,6 @@ pyrightconfig.json
 Pipfile.lock
 
 graph.png
+result
+src/flake.lock
+src/flake.nix

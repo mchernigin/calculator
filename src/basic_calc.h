@@ -3,11 +3,6 @@
 
 #include "abstract_calc.h"
 
-typedef struct basic_calc_t {
-    abstract_calc_t base;
-    yyscan_t scanner;
-} basic_calc_t ;
-
-abstract_calc_t *init_basic_calc (char *expr);
+extern calc_funcs_t calc_basic_funcs;
 
 #endif // BASIC_CALC_H

@@ -21,16 +21,16 @@
 
 calclist: exp {
     (void) yynerrs; // Suppress warning of unused variable
-    EVAL ($1);
+    EVAL_RESULT ($1);
 }
 
 exp:
-  NUM               { $$ = EVAL_NUM ($1);     }
-| exp '+' exp       { $$ = EVAL_ADD ($1, $3); }
-| exp '-' exp       { $$ = EVAL_SUB ($1, $3); }
-| exp '*' exp       { $$ = EVAL_MUL ($1, $3); }
-| exp '/' exp       { $$ = EVAL_DIV ($1, $3); }
-| '-' exp %prec NEG { $$ = EVAL_NEG ($2);     }
+  NUM               { EVAL_NUM ($$, $1);     }
+| exp '+' exp       { EVAL_ADD ($$, $1, $3); }
+| exp '-' exp       { EVAL_SUB ($$, $1, $3); }
+| exp '*' exp       { EVAL_MUL ($$, $1, $3); }
+| exp '/' exp       { EVAL_DIV ($$, $1, $3); }
+| '-' exp %prec NEG { EVAL_NEG ($$, $2);     }
 | '(' exp ')'       { $$ = $2;                }
 
 %%
