@@ -8,9 +8,9 @@ import seaborn as sns
 
 
 CALC_BIN = "./src/calc"
-MODES = ["basic", "ast_rec", "ast_iter"]
-LABELS = ["Basic", "AST recursive", "AST iterative"]
-LINES_STYLES = ["solid", "dashed", "dashdot"]
+MODES = ["ast_rec", "ast_iter"]
+LABELS = ["AST recursive", "AST iterative", "AST old"]
+LINES_STYLES = ["solid", "solid", "solid"]
 
 
 def gen_num(boundary: int, use_float: bool, precision: int) -> int | float:
@@ -20,7 +20,7 @@ def gen_num(boundary: int, use_float: bool, precision: int) -> int | float:
 
 
 def gen_exp_easy(numberop: int) -> str:
-    return "1+1*1" * (numberop // 2) + ("+1" * (numberop % 2))
+    return "1" + "+1" * (numberop - 1)
 
 
 def gen_exp_rand(
@@ -66,6 +66,22 @@ def benchmark(cfg: argparse.Namespace, mode: str, sizes: list[int]) -> list[floa
     return time
 
 
+def benchmark_old(cfg: argparse.Namespace, sizes: list[int]) -> list[float]:
+    time: list[float] = []
+    for i, numberop in enumerate(sizes):
+        if cfg.random:
+            exp = gen_exp_rand(numberop)
+        else:
+            exp = gen_exp_easy(numberop)
+        cmd = ["./src/calc-master", "-t", "-a", "-n", str(cfg.numcalc), exp]
+        result = subprocess.run(cmd, capture_output=True)
+        time.append(float(result.stderr.decode().strip()))
+        print("Running ast_old version".ljust(25), end="")
+        draw_progress(i, len(sizes) - 1)
+    print()
+    return time
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -86,7 +102,8 @@ def main():
         const=True,
         default=False,
     )
-    parser.add_argument("-s", "--seed", help="random seed", type=int, default=0)
+    parser.add_argument("-s", "--step", help="iteration step", type=int, default=1)
+    parser.add_argument("--seed", help="random seed", type=int, default=0)
     parser.add_argument(
         "-n", "--numcalc", help="number of calculations", type=int, default=50_000
     )
@@ -102,8 +119,9 @@ def main():
     cfg = parser.parse_args()
     random.seed(cfg.seed)
 
-    sizes = [x for x in range(cfg.min, cfg.max + 1, 10)]
+    sizes = [x for x in range(cfg.min, cfg.max + 1, cfg.step)]
     times = [benchmark(cfg, mode, sizes) for mode in MODES]
+    times.append(benchmark_old(cfg, sizes))
 
     ax = sns.lineplot()
     for mode_time, style in zip(times, LINES_STYLES):
