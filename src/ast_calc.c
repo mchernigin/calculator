@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "abstract_calc.h"
-#include "config.h"
 
 typedef enum {
     NT_NUM,

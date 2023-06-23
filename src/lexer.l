@@ -2,7 +2,7 @@
 %option reentrant never-interactive bison-bridge
 
 %{
-    #include "config.h"
+    #include "abstract_calc.h"
     #include "parser.h"
     #define YYSTYPE calc_value_t
     #ifndef YY_DO_BEFORE_ACTION

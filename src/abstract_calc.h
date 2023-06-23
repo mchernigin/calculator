@@ -2,7 +2,10 @@
 #define ABSTRACT_CALC_H
 
 #include <stdlib.h>
-#include "config.h"
+
+#ifndef calc_value_t
+#   define calc_value_t double
+#endif
 
 struct calc_funcs_t;
 
