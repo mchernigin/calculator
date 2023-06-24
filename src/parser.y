@@ -31,6 +31,7 @@ exp:
 | exp '*' exp       { EVAL_MUL ($$, $1, $3); }
 | exp '/' exp       { EVAL_DIV ($$, $1, $3); }
 | '-' exp %prec NEG { EVAL_NEG ($$, $2);     }
-| '(' exp ')'       { $$ = $2;                }
+| '(' exp ')'       { $$ = $2;               }
+| 'x'               { EVAL_X ($$);           }
 
 %%

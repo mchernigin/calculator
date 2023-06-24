@@ -23,6 +23,7 @@ typedef struct config_t {
     unsigned long iteration_number;
     calc_funcs_t *calc_funcs;
     bool print_time;
+    x_t x;
 } config_t;
 
 int
@@ -30,7 +31,7 @@ parse_args (config_t *config, int argc, char *argv[])
 {
     opterr = 0; // Suppress getopt error printing
     int opt;
-    while (-1 != (opt = getopt (argc, argv, "hp:n:t"))) {
+    while (-1 != (opt = getopt (argc, argv, "hx:p:n:t"))) {
         switch (opt) {
         case 'h':
             USAGE ();
@@ -48,6 +49,18 @@ parse_args (config_t *config, int argc, char *argv[])
                 return (EXIT_FAILURE);
             }
             break;
+        case 'x':
+        {
+            char *end;
+            config->x.value = strtold (optarg, &end);
+            if ('\0' != *end) {
+                fprintf (stderr, "error: n is not an integer\n");
+                USAGE ();
+                return (EXIT_FAILURE);
+            }
+            config->x.specified = true;
+            break;
+        }
         case 'n':
         {
             char *end;
@@ -91,6 +104,7 @@ main (int argc, char *argv[])
         .iteration_number = 1,
         .calc_funcs = &calc_basic_funcs,
         .print_time = false,
+        .x = { .specified = false }
     };
     if (0 != parse_args (&config, argc, argv)) {
         return (EXIT_FAILURE);
@@ -103,8 +117,9 @@ main (int argc, char *argv[])
 
     clock_t begin = clock ();
 
+    calc_value_t result;
     for (size_t i = 0; i < config.iteration_number; ++i) {
-        if (0 != run_calc (calc)) {
+        if (0 != run_calc (calc, &config.x, &result)) {
             exit_code = EXIT_FAILURE;
             goto destroy_calc;
         }
@@ -113,7 +128,7 @@ main (int argc, char *argv[])
     clock_t end = clock ();
     double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
 
-    printf ("%g\n", calc->result);
+    printf ("%g\n", result);
     if (config.print_time) {
         fprintf (stderr, "%lf", time_spent);
     }
