@@ -112,7 +112,6 @@ ast_eval_rec (arena_node_t *arena, x_t *x, int index)
 typedef struct ast_calc_extra_t {
     calc_value_t result;
     arena_node_t arena;
-    x_t x;
 } ast_calc_extra_t;
 
 #define EVAL_RESULT(VALUE) {                                                   \
@@ -124,15 +123,7 @@ typedef struct ast_calc_extra_t {
 }
 
 #define EVAL_X(LHS) {                                                          \
-    ast_calc_extra_t *extra = yyget_extra (scanner);                           \
-    if (extra->x.specified) {                                                  \
-        LHS = (ast_node_t) {                                                   \
-            .value = extra->x.value,                                           \
-            .node_type = NT_X                                                  \
-        };                                                                     \
-    } else {                                                                   \
-        yyerror (scanner, "x was not specified");                              \
-    }                                                                          \
+    LHS = (ast_node_t) { .value = 0, .node_type = NT_X };                      \
 }
 
 #define EVAL_NUM(LHS, NODE) {                                                  \
