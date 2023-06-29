@@ -1,10 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "abstract_calc.h"
-#include "config.h"
 
 typedef enum {
     NT_NUM,
+    NT_X,
     NT_PLUS,
     NT_MINUS,
     NT_MUL,
@@ -28,6 +26,9 @@ typedef struct arena_node_t {
     size_t capacity;
     size_t allocated;
 } arena_node_t;
+
+#define YYSTYPE ast_node_t
+#include "lexer.h"
 
 #define ARENA_INIT_CAPACITY 16
 #define ARENA_CAPACITY_GROWTH 2
@@ -81,33 +82,49 @@ arena_allocate (arena_node_t *arena, size_t alloc_size)
 }
 
 static calc_value_t
-ast_eval_rec (arena_node_t *arena, int index)
+ast_eval_rec (arena_node_t *arena, x_t *x, int index)
 {
     ast_node_t *node = &arena->ast[index];
     switch (node->node_type) {
     case NT_NUM:
         return (node->value);
+    case NT_X:
+        return (x->value);
     case NT_PLUS:
-        return (ast_eval_rec (arena, node->left) + ast_eval_rec (arena, node->right));
+        return (ast_eval_rec (arena, x, node->left)
+                + ast_eval_rec (arena, x, node->right));
     case NT_MINUS:
-        return (ast_eval_rec (arena, node->left) - ast_eval_rec (arena, node->right));
+        return (ast_eval_rec (arena, x, node->left)
+                - ast_eval_rec (arena, x, node->right));
     case NT_MUL:
-        return (ast_eval_rec (arena, node->left) * ast_eval_rec (arena, node->right));
+        return (ast_eval_rec (arena, x, node->left)
+                * ast_eval_rec (arena, x, node->right));
     case NT_DIV:
-        return (ast_eval_rec (arena, node->left) / ast_eval_rec (arena, node->right));
+        return (ast_eval_rec (arena, x, node->left)
+                / ast_eval_rec (arena, x, node->right));
     case NT_NEG:
-        return (-ast_eval_rec (arena, node->left));
+        return (-ast_eval_rec (arena, x, node->left));
     default:
         __builtin_unreachable ();
     }
 }
 
+typedef struct ast_calc_extra_t {
+    calc_value_t result;
+    arena_node_t arena;
+} ast_calc_extra_t;
+
 #define EVAL_RESULT(VALUE) {                                                   \
-    arena_node_t *arena = yyget_extra (scanner);                               \
+    ast_calc_extra_t *extra = yyget_extra (scanner);                           \
+    arena_node_t *arena = &extra->arena;                                       \
     int index = arena_allocate (arena, 1);                                     \
     if (index >= 0) {                                                          \
         arena->ast[index] = VALUE;                                             \
     }                                                                          \
+}
+
+#define EVAL_X(LHS) {                                                          \
+    LHS = (ast_node_t) { .value = 0, .node_type = NT_X };                      \
 }
 
 #define EVAL_NUM(LHS, NODE) {                                                  \
@@ -118,7 +135,8 @@ ast_eval_rec (arena_node_t *arena, int index)
 }
 
 #define AST_BIN_OP(LHS, NODE_TYPE, LEFT, RIGHT) {                              \
-    arena_node_t *arena = yyget_extra (scanner);                               \
+    ast_calc_extra_t *extra = yyget_extra (scanner);                           \
+    arena_node_t *arena = &extra->arena;                                       \
     int left = arena_allocate (arena, 2);                                      \
     if (left >= 0) {                                                           \
         arena->ast[left] = LEFT;                                               \
@@ -135,55 +153,58 @@ ast_eval_rec (arena_node_t *arena, int index)
 #define EVAL_DIV(LHS, LEFT, RIGHT) AST_BIN_OP(LHS, NT_DIV, LEFT, RIGHT)
 #define EVAL_NEG(LHS, VALUE) AST_BIN_OP(LHS, NT_NEG, VALUE, (ast_node_t) {})
 
-#define YYSTYPE ast_node_t
 #define yyparse ast_parse
 #include "parser.c"
 
 typedef struct ast_calc_t {
     abstract_calc_t base;
-    arena_node_t arena;
+    ast_calc_extra_t extra;
 } ast_calc_t;
 
 static int
-ast_calc_run_rec (abstract_calc_t *calc)
+ast_calc_run_rec (abstract_calc_t *calc, x_t *x, calc_value_t *result)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
-    ast_calc->base.result =
-        ast_eval_rec (&ast_calc->arena, ast_calc->arena.allocated - 1);
+    *result = ast_eval_rec (&ast_calc->extra.arena, x,
+                            ast_calc->extra.arena.allocated - 1);
     return (EXIT_SUCCESS);
 }
 
 static int
-ast_calc_run_iter (abstract_calc_t *calc)
+ast_calc_run_iter (abstract_calc_t *calc, x_t *x, calc_value_t *result)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
-    calc_value_t results[ast_calc->arena.allocated];
+    arena_node_t *arena = &ast_calc->extra.arena;
+    calc_value_t results[arena->allocated];
 
-    for (size_t i = 0; i < ast_calc->arena.allocated; ++i) {
-        ast_node_t *node = &ast_calc->arena.ast[i];
+    for (size_t i = 0; i < arena->allocated; ++i) {
+        ast_node_t *node = &arena->ast[i];
         switch (node->node_type) {
         case NT_NUM:
-          results[i] = node->value;
-          break;
+            results[i] = node->value;
+            break;
+        case NT_X:
+            results[i] = x->value;
+            break;
         case NT_PLUS:
-          results[i] = results[node->left] + results[node->right];
-          break;
+            results[i] = results[node->left] + results[node->right];
+            break;
         case NT_MINUS:
-          results[i] = results[node->left] - results[node->right];
-          break;
+            results[i] = results[node->left] - results[node->right];
+            break;
         case NT_MUL:
-          results[i] = results[node->left] * results[node->right];
-          break;
+            results[i] = results[node->left] * results[node->right];
+            break;
         case NT_DIV:
-          results[i] = results[node->left] / results[node->right];
-          break;
+            results[i] = results[node->left] / results[node->right];
+            break;
         case NT_NEG:
-          results[i] = -results[node->left];
-          break;
+            results[i] = -results[node->left];
+            break;
         }
     }
 
-    ast_calc->base.result = results[ast_calc->arena.allocated - 1];
+    *result = results[arena->allocated - 1];
     return (EXIT_SUCCESS);
 }
 
@@ -191,7 +212,7 @@ static void
 ast_calc_destroy (abstract_calc_t *calc)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
-    arena_destroy (&ast_calc->arena);
+    arena_destroy (&ast_calc->extra.arena);
     free (ast_calc);
 }
 
@@ -204,13 +225,13 @@ ast_calc_init (char *expr)
         return (NULL);
     }
 
-    if (0 != arena_init (&calc->arena)) {
+    if (0 != arena_init (&calc->extra.arena)) {
         return (NULL);
     }
 
     yyscan_t scanner = NULL;
 
-    if (0 != yylex_init_extra (&calc->arena, &scanner)) {
+    if (0 != yylex_init_extra (&calc->extra, &scanner)) {
         perror ("error: cannot initialize scanner");
         goto fail_free_calc;
     }

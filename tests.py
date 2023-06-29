@@ -26,3 +26,8 @@ def test_long(mode):
     res = run_calc(["-p", mode, expr])
     assert res == str(1 + EXPR_LENGTH)
 
+@pytest.mark.parametrize("mode", MODES)
+def test_x(mode):
+    expr = "1+x-3*4/x+(7-x)*(x/10)"
+    res = run_calc(["-x", "1.61", "-p", mode, expr])
+    assert res == "-3.97563"
