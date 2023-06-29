@@ -116,9 +116,10 @@ typedef struct ast_calc_extra_t {
 
 #define EVAL_RESULT(VALUE) {                                                   \
     ast_calc_extra_t *extra = yyget_extra (scanner);                           \
-    int index = arena_allocate (&extra->arena, 1);                             \
+    arena_node_t *arena = &extra->arena;                                       \
+    int index = arena_allocate (arena, 1);                                     \
     if (index >= 0) {                                                          \
-        extra->arena.ast[index] = VALUE;                                       \
+        arena->ast[index] = VALUE;                                             \
     }                                                                          \
 }
 
@@ -135,10 +136,11 @@ typedef struct ast_calc_extra_t {
 
 #define AST_BIN_OP(LHS, NODE_TYPE, LEFT, RIGHT) {                              \
     ast_calc_extra_t *extra = yyget_extra (scanner);                           \
-    int left = arena_allocate (&extra->arena, 2);                              \
+    arena_node_t *arena = &extra->arena;                                       \
+    int left = arena_allocate (arena, 2);                                      \
     if (left >= 0) {                                                           \
-        extra->arena.ast[left] = LEFT;                                         \
-        extra->arena.ast[left + 1] = RIGHT;                                    \
+        arena->ast[left] = LEFT;                                               \
+        arena->ast[left + 1] = RIGHT;                                          \
         LHS.left = left;                                                       \
         LHS.right = left + 1;                                                  \
     }                                                                          \
@@ -156,7 +158,6 @@ typedef struct ast_calc_extra_t {
 
 typedef struct ast_calc_t {
     abstract_calc_t base;
-
     ast_calc_extra_t extra;
 } ast_calc_t;
 
@@ -173,10 +174,11 @@ static int
 ast_calc_run_iter (abstract_calc_t *calc, x_t *x, calc_value_t *result)
 {
     ast_calc_t *ast_calc = (ast_calc_t *) calc;
-    calc_value_t results[ast_calc->extra.arena.allocated];
+    arena_node_t *arena = &ast_calc->extra.arena;
+    calc_value_t results[arena->allocated];
 
-    for (size_t i = 0; i < ast_calc->extra.arena.allocated; ++i) {
-        ast_node_t *node = &ast_calc->extra.arena.ast[i];
+    for (size_t i = 0; i < arena->allocated; ++i) {
+        ast_node_t *node = &arena->ast[i];
         switch (node->node_type) {
         case NT_NUM:
             results[i] = node->value;
@@ -199,10 +201,10 @@ ast_calc_run_iter (abstract_calc_t *calc, x_t *x, calc_value_t *result)
         case NT_NEG:
             results[i] = -results[node->left];
             break;
-    }
+        }
     }
 
-    *result = results[ast_calc->extra.arena.allocated - 1];
+    *result = results[arena->allocated - 1];
     return (EXIT_SUCCESS);
 }
 
